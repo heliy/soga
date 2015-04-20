@@ -78,12 +78,18 @@ public class Setting {
 				return display(true);
 			}else if(arg.equals("-snpfile")){
 				i++;
+				if(i == l){
+					throw new ArgsException("No Input Snp File.");					
+				}
 				snpFile = args[i];
 				if((i == args.length) || snpFile.charAt(0) == '-'){
 					throw new ArgsException("No Input Snp File.");
 				}
 			}else if(arg.equals("-sampleinfo")){
 				i++;
+				if(i == l){
+					throw new ArgsException("No Input Sample Info File.");
+				}
 				sampleFile = args[i];
 				if((i == args.length) || sampleFile.charAt(0) == '-'){
 					throw new ArgsException("No Input Sample Info File.");
@@ -91,12 +97,18 @@ public class Setting {
 				parseStatus();
 			}else if(arg.equals("-filesplit")){
 				i++;
+				if(i == l){
+					throw new ArgsException("No File Split Tag.");
+				}
 				fileSplit = args[i];
 				if((i == args.length) || fileSplit.charAt(0) == '-'){
 					throw new ArgsException("No File Split Tag.");
 				}
 			}else if(arg.equals("-output")){
 				i++;
+				if(i == l){
+					throw new ArgsException("No Output File Name.");
+				}
 				output = args[i];
 				if((i == args.length) || output.charAt(0) == '-'){
 					throw new ArgsException("No Output File Name.");
@@ -110,7 +122,7 @@ public class Setting {
 				if(NNRatio < 0 || NNRatio > 1){
 					throw new ArgsException("Unvalid Ratio of NN.");					
 				}
-			}else if(args.equals("-maf")){
+			}else if(arg.equals("-maf")){
 				i++;
 				if((i == args.length) || args[i].charAt(0) == '-'){
 					throw new ArgsException("No Limit Value of MAF.");
@@ -119,7 +131,7 @@ public class Setting {
 				if(MAF < 0 || MAF > 1){
 					throw new ArgsException("Unvalid value of MAF.");					
 				}
-			}else if(args.equals("-hwe")){
+			}else if(arg.equals("-hwe")){
 				i++;
 				if((i == args.length) || args[i].charAt(0) == '-'){
 					throw new ArgsException("No Limit Value of Hardy–Weinberg equilibrium.");
@@ -128,7 +140,7 @@ public class Setting {
 				if(HWE < 0 || HWE > 1){
 					throw new ArgsException("Unvalid Ratio of Hardy–Weinberg equilibrium.");					
 				}
-			}else if(args.equals("-maxn")){
+			}else if(arg.equals("-maxn")){
 				i++;
 				if((i == args.length) || args[i].charAt(0) == '-'){
 					throw new ArgsException("No Limit Ratio of N in one Snp.");
@@ -245,7 +257,7 @@ public class Setting {
 		}
 		System.out.println("SNP data file: "+snpFile);
 		System.out.println("Sample Info file: "+sampleFile);
-		System.out.println("OUTPUT: "+snpFile);
+		System.out.println("OUTPUT: "+output);
 		System.out.println("cases: "+cases);
 		System.out.println("controls: "+controls);
 		System.out.println("unknowns: "+unknowns);

@@ -63,16 +63,16 @@ A toolkit to caculate Linkage Disequilibrium and find haplotype
 
 **Quality Control**
 
-**--maxn**,	uppper bound of ratio of n in one SNP,
+**-maxn**,	uppper bound of ratio of n in one SNP,
  **default 0.8**.
 
-**--nnratio**,	upper bound of ratio of nn genotype in one SNP,
+**-nnratio**,	upper bound of ratio of nn genotype in one SNP,
  **default 0.05**.
 
-**--maf**,	lower bound of MAF(Minor Allele Frequency),
+**-maf**,	lower bound of MAF(Minor Allele Frequency),
  **default 0.01.**
 
-**--hwe**,	lower bound of HWE(Hardy–Weinberg equilibrium),
+**-hwe**,	lower bound of HWE(Hardy–Weinberg equilibrium),
  **default 0.001.**
 
 **-minHt**,	lower bound of ratio of haplotype when write
@@ -140,6 +140,8 @@ GPLv3
 4. Process in X/Y Chromosome and Family Dataset.
 
 5. Input File from PLINK format.
+
+42. 继续添砖加瓦：）
 
 ------------------
 
@@ -296,6 +298,8 @@ Haplotype_ID(1)	cc-pvalue(0.5152257845253427)	cases/controls(13/210)	ratio_in_sa
 1. deletealready.py
 If running have been interrupted, you can use this 
 to delete the snp datas already caculated.
+```
 $ python2 deletealready.py breast_cancer_snps \
 > rs55926024 "\t" > breast_cancer_snps_1504201830
+```
 the snps before rs55926024 will not in breast_cancer_snps_1504201830
