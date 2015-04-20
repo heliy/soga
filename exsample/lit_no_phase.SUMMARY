@@ -1,0 +1,19 @@
+BEGIN: Mon Apr 20 17:32:51 CST 2015
+END: Mon Apr 20 17:33:04 CST 2015
+Snp Files: exsample/lit.FILTER
+Sample Info File: exsample/lit.info
+OUTPUT File:
+exsample/lit_no_phase.BLOCK
+Samples:
+	Total: 286
+	Cases: 14
+	Controls: 272
+	Unknowns: 0
+SNPS: 	Count 	passQC
+total: 	1919	1919
+chr21: 	11	11
+chr22: 	1908	1908
+BLOCKS: 	Count	
+total: 	356
+chr21: 	2
+chr22: 	354
