@@ -88,10 +88,10 @@ public class Info {
 		license = "GPLv3";
 		
 		alsosee = new String[5];
-		alsosee[0] = "The algorithem of LD caculation is same as [Haploview](http://www.ncbi.nlm.nih.gov/pubmed/15297300).";
-		alsosee[1] = "The algorithem of haplotype block finding is [Taliun et al, 2014](http://www.ncbi.nlm.nih.gov/pubmed/24423111).";
-		alsosee[2] = "The algorithem of phase is [SHAPEIT2](http://www.ncbi.nlm.nih.gov/pubmed/22138821/).";
-		alsosee[3] = "The algorithem of tag SNP is [Yan et al, 2015](http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4373116/).";
+		alsosee[0] = "The algorithm of LD caculation is same as [Haploview](http://www.ncbi.nlm.nih.gov/pubmed/15297300).";
+		alsosee[1] = "The algorithm of haplotype block finding is [Taliun et al, 2014](http://www.ncbi.nlm.nih.gov/pubmed/24423111).";
+		alsosee[2] = "The algorithm of phase is [SHAPEIT2](http://www.ncbi.nlm.nih.gov/pubmed/22138821/).";
+		alsosee[3] = "The algorithm of tag SNP is [Yan et al, 2015](http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4373116/).";
 		alsosee[4] = "This is the work of Heliy's undergraduate graduation project, [article, chinese]().";
 		
 		
