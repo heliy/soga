@@ -303,3 +303,5 @@ $ python2 deletealready.py breast_cancer_snps \
 > rs55926024 "\t" > breast_cancer_snps_1504201830
 ```
 the snps before rs55926024 will not in breast_cancer_snps_1504201830
+
+2. blockprase.py
