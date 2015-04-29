@@ -1,17 +1,14 @@
 package io;
 
-import java.io.FileNotFoundException;
-import java.util.Scanner;
-
 import parameter.Setting;
 
-public class sampleQC {
+public class QCSample {
 	double nnRatio;
 	int[] samples;
 	int len;
 	long total;
 	
-    public sampleQC(Setting rc){
+    public QCSample(Setting rc){
     	nnRatio = rc.getNNRatio();
     	len = rc.getSAMPLES();
     	samples = new int[len];
@@ -60,27 +57,5 @@ public class sampleQC {
 		}
 	}
     
-//	private void setQCSamples(Setting rc) throws FileNotFoundException{
-//		String line;
-//		int i;
-//		String[] types = new String[len];
-//		int head = rc.getHEAD();
-//		
-//		while(in.hasNextLine()){
-//			line = in.nextLine();
-//			String[] parts = line.split(rc.getFileSplit());
-//			for(i = 0; i < len; i++){
-//				types[i] = parts[i + head];
-//			}
-//			qc.update(types);
-//		}
-//		rc.setValids(qc.valids());
-//		valids = rc.getValids();
-//	    valid = rc.getValids().length;
-//		rc.setSNPS(qc.totalSnp());
-//		in.close();
-//		in = new Scanner(f);
-//	}
-
-
+    
 }

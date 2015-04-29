@@ -26,7 +26,7 @@ A toolkit to caculate Linkage Disequilibrium and find haplotype
 **--cc**,	to do case-control test in 1)SNP, have OR value
  in __OUTPUT__.CHECK, and, 2)haplotypes, output in
   __OUTPUT__.BLOCK; if you have `--block` and `--phase` in
-   parameters, it will do 1) and 2), otherwise, soga just do 1).
+   parameters, SOGA will do 1) and 2), otherwise, it just do 1).
 
 **--tag**,	to find tag SNP in blocks, output in
  __OUTPUT__.BLOCK, MUST also have `--block`
@@ -86,10 +86,10 @@ A toolkit to caculate Linkage Disequilibrium and find haplotype
 # INPUT REQUIREMENT
 
 **SNP DATA**,	One line is a SNP, eg. 
- `rs3013006 C/G chr21 16054667 CG GC GC GG GC CC GC CC CC ...`   is `#rs allele1/allele2 chromosome position genotype1 genotype2
- genotyp3 ...`. You can have many different chromosomes,
- but MUST in one continuous segment, NOT have many segments
- in many places.
+ `rs3013006 C/G chr21 16054667 CG GC GC GG GC CC GC CC CC ...`   is 
+ `#rs allele1/allele2 chromosome position genotype1 genotype2 genotyp3 ...`.
+ You can have many different chromosomes, but MUST in one continuous
+ segment, NOT have many segments in many places.
 
 **Sample INFO**,	Info file must have
  `0`(normal)/`1`(case)/`-1`(unknown)s, represents status
@@ -285,7 +285,7 @@ There are results in exsample/lit_with_phase.BLOCK:
 
 >> Block_ID(1)
 chrome(chr21)	begin_position(16053791)	end_position(16054740)	number_of_snps(3)	rs_ID_1st(rs11703994)	rs_ID_2nd(rs3013006)	rs_ID_3rd(rs55926024)
-Haplotype_ID(1)	cc-pvalue(0.5152257845253427)	cases/controls(13/210)	ratio_in_samples(0.38986013986013984)	allele_1st(C)	allele_2nd(C)	allele_3rd(G)
+Haplotype_ID(1)	cc-pvalue(0.5152257845253427)	cases/controls(13/210)	ratio_in_samples(0.38986013986013984)	allele_1st(C)	allele_2nd(C)	allele_3rd(G)	OR(1.0396039603960396)	OR_CI_Low(0.432615722096604)	OR_CI_High(50.464377629442176)
 ......
 ......
 ......
