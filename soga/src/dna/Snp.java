@@ -1,90 +1,190 @@
 package dna;
 
 import dna.LD;
+import exceptions.GenoTypeException;
 import parameter.Setting;
 import parameter.Base;
-import parameter.GenoType;
 
-import java.util.HashMap;
+import java.util.WeakHashMap;
+
+import calculate.OR;
+import calculate.PairwiseCal;
 
 public class Snp {
-	String rs; // rs + number
-	int A;
-	int B;
-	String chr; // chromesome
-	long position; // position in chromesome
-	Base base;
-	GenoType genotype;
-	int genos[]; // genotypes data
-	int types[][]; // 与AB对应的基因型 用来计算LD
-	@SuppressWarnings("rawtypes")
-	HashMap pws; // pairwise to other snps
-	int alleleCount[]; // count of alleles
-	double alleleFreq[]; // frequency of alleles
-	double maf; // min allele frequency
-	int genoCount[]; // count of genotypes of genos
-	double genoFreq[]; // frequency of genotypes
-	double hw; // hardy-weinberg p value
-	boolean isBad; // is bad snp
+	private static int NN = 0;
+	private static int AA = 1;
+	private static int AB = 2;
+	private static int BB = 3;
+	private static int N = 0;
+	
+	private String rs; // rs + number
+	private int A;
+	private int B;
+	private String chr; // chromesome
+	private long position; // position in chromesome
+	private Base base;
+	private int genos[]; // genotypes data
+	private int types[][]; // 与AB对应的基因型 用来计算LD
+	private WeakHashMap<Snp, LD> pws; // pairwise to other snps
+	private int alleleCount[]; // count of alleles
+	private double alleleFreq[]; // frequency of alleles
+	private double maf; // min allele frequency
+	private int genoCount[]; // count of genotypes of genos
+	private double genoFreq[]; // frequency of genotypes
+	private double hw; // hardy-weinberg p value
+	private double or; // ORrate
+	private double orLow;  // OR置信区间
+	private double orHigh; // OR置信区间
+	private boolean isBad; // is bad snp
 
-	public Snp(String rsNo, String Chr, String sposition, String alleles,
-			String[] parts, Setting rc) {
+	public Snp(String rsNo, int a, int b, String Chr, String sposition,
+			String[] parts, Setting rc) throws GenoTypeException {
 		// rs, alleles, chr, position, genos....
 		rs = rsNo;
-		parseAlleles(alleles); // 等位的碱基 [A, B, N]
-		position = Long.parseLong(sposition); // 所在位置
+		position = Integer.parseInt(sposition); // 所在位置
 		chr = Chr;
 		base = new Base();
-		genotype = new GenoType(A, B);
+		A = a;
+		B = b;
 		typeCount(parts);
 		maf = Math.min(alleleFreq[A], alleleFreq[B]); // 最小等位频率
 		hw = calHW(); // HW平衡p值
 		isBad = judgeBad(rc); // 是否通过QC
-		pws = new HashMap<Snp, LD>(); // 与其他snp的LD值
-
-	}
-
-	public void display() {
-		// TODO
-		System.out.println(rs + "\t" + chr + "\t" + position + "\t"
-				+ base.getBase(A) + "\t" + base.getBase(B) + "\t["
-				+ alleleCount[A] + ", " + alleleCount[B] + ", "
-				+ alleleCount[base.N()] + "]\n");
-
-		System.out.println("frequency of alleles: " + alleleFreq[0] + ", "
-				+ alleleFreq[3] + ", " + alleleFreq[4]);
-		System.out.println("counts of genotypes: " + genoCount[0] + ", "
-				+ genoCount[1] + ", " + genoCount[2] + ", " + genoCount[3]);
-		System.out.println("frequency of genotypes: " + genoFreq[0] + ", "
-				+ genoFreq[1] + ", " + genoFreq[2] + ", " + genoFreq[3]);
-		System.out.println("MAF:" + maf);
-		System.out.println("H-W:" + hw);
-		if (isBad) {
-			System.out.println("Bad");
-		} else {
-			System.out.println("OK");
+		pws = new WeakHashMap<Snp, LD>(); // 与其他snp的LD值
+		or = -1;
+		if(rc.doCC()){
+			setOR(rc.getStatus());
 		}
 	}
 	
-	public int[][] getTypes(){
-		return types;
+	public int hashCode(){
+		return (int)position;
 	}
+	
 
-	private void parseAlleles(String ts) {
-		// parse string to two alleles
-		// A/C -> A C
-		// TODO: error control and insert deletion
-		Base base = new Base();
-		A = base.baseNo(ts.charAt(0));
-		B = base.baseNo(ts.charAt(2));
-		if (A > B) { // 保证 A 的序号小于 B
-			int tmp = B;
-			B = A;
-			A = tmp;
+	public String toString() {
+		String s = rs + "\t" + base.getBase(A) + "/" + base.getBase(B) + "\t"
+				+ chr + "\t" + position + "\t" + base.getBase(A) + "\t"
+				+ alleleCount[A] + "\t" + alleleFreq[A] + "\t"
+				+ base.getBase(B) + "\t" + alleleCount[B] + "\t"
+				+ alleleFreq[B] + "\t" + alleleCount[N] + "\t"
+				+ alleleFreq[N] + "\t" + genoCount[AA] + "\t"
+				+ genoFreq[AA] + "\t" + genoCount[AB] + "\t" + genoFreq[AB] + "\t"
+				+ genoCount[BB] + "\t" + genoFreq[BB] + "\t" + genoCount[NN]
+				+ "\t" + genoFreq[NN] + "\t" + maf + "\t" + hw + "\t";
+		if(or >= 0){
+			s += or+"\t"+orLow+"\t"+orHigh+"\t";
+		}
+		if (isBad) {
+			s += "NO";
+		} else {
+			s += "YES";
+		}
+		s += "\n";
+		return s;
+	}
+	
+	// 0/1等位
+	public int getDis(int s){
+		if(s == A){
+			return 0;
+		}else if(s == B){
+			return 1;
+		}else{
+			return -1;
 		}
 	}
+	
+	public int[][] getTypes() {
+		return types;
+	}
+		
+	public int[] getAlleleCount() {
+		// return [N, A, B]
+		int[] alls = new int[3];
+		alls[N] = alleleCount[N];
+		alls[1] = alleleCount[A];
+		alls[2] = alleleCount[B];
+		return alls;
+	}
 
-	private void typeCount(String[] parts) {
+	public double getOR(){
+		return or;
+	}
+	
+	public double getOrLow() {
+		return orLow;
+	}
+
+	public double getOrHigh() {
+		return orHigh;
+	}
+
+	public String getRs() {
+		return rs;
+	}
+
+	public long getPosition() {
+		return position;
+	}
+
+	public double getMaf() {
+		return maf;
+	}
+
+	public int[] getGenoCount() {
+		return genoCount;
+	}
+
+	public double[] getGenoFreq() {
+		return genoFreq;
+	}
+
+	public double getHw() {
+		return hw;
+	}
+
+	public boolean isBad() {
+		return isBad;
+	}
+	
+	public int getA() {
+		return A;
+	}
+
+	public int getB() {
+		return B;
+	}
+
+	public String getChr() {
+		return chr;
+	}
+	
+	public boolean hasLD(Snp another){
+		if(pws.containsKey(another)){
+			return true;
+		}else{
+			return false;
+		}
+		
+	}
+	
+	public LD getLD(PairwiseCal cal, Snp another) {
+		if(pws.containsKey(another)){
+			return pws.get(another);
+		}else{
+			LD ld = cal.pw(this, another);
+			this.setLD(another, ld);
+			another.setLD(this, ld);
+			return ld;
+		}
+	}
+	
+	private void setLD(Snp another, LD ld){
+		pws.put(another, ld);
+	}
+
+	private void typeCount(String[] parts) throws GenoTypeException {
 		String s;
 		int i, len = parts.length;
 		alleleCount = new int[5];
@@ -95,41 +195,31 @@ public class Snp {
 			s = parts[i];
 			int first = base.baseNo(s.charAt(0));
 			int second = base.baseNo(s.charAt(1));
+//			System.out.println(A+", "+B);
+			if((first != A && first != B && first != N) || (second != A && second != B && second != N)){
+				throw new GenoTypeException(s);
+			}
 			if (first > second) { // 保证 first 的序号小于 second
 				int tmp = second;
 				second = first;
 				first = tmp;
 			}
+			
 			alleleCount[first]++;
 			alleleCount[second]++;
-			int type = genotype.getNo(first, second);
-			genos[i] = type;
-			types[i] = new int[2];
-			if(first == A){
-				types[i][0] = 0;
-			}else if(first == B){
-				types[i][0] = 1;
-			}else{
-				types[i][0] = -1;
-			}
-			if(second == A){
-				types[i][1] = 0;
-			}else if (second == B){
-				types[i][1] = 1;
-			}else{
-				types[i][1] = -1;
-			}
-			
-			genoCount[type]++;
+			types[i][0] = (first == A) ? 0 : 1;
+			types[i][1] = (second == A) ? 0 : 1;
+			genos[i] = types[i][0] + types[i][1] + 1; 
+			genoCount[genos[i]]++;
 		}
-		double n = (double) alleleCount[base.N()] * 2;
+		double n = (double) alleleCount[N];
 		alleleFreq = new double[5];
-		alleleFreq[base.N()] = n / len * 2; // 缺失率
+		alleleFreq[N] = n / len * 2; // 缺失率
 		alleleFreq[A] = alleleCount[A] / (len * 2 - n); // A 的比例
 		alleleFreq[B] = 1 - alleleFreq[A];
 
 		genoFreq = new double[4];
-		n = (double) genoCount[0];
+		n = (double) genoCount[NN];
 		genoFreq[0] = n / len; // 缺失率
 		double sum = len - n;
 		for (i = 1; i < 4; i++) {
@@ -138,11 +228,11 @@ public class Snp {
 	}
 
 	private double calHW() {
-		int homc = Math.max(genoCount[genotype.getNo(A, A)],
-				genoCount[genotype.getNo(B, B)]); // AA/BB中大的一个
-		int homr = Math.min(genoCount[genotype.getNo(A, A)],
-				genoCount[genotype.getNo(B, B)]); // AA/BB中小的一个
-		int hets = genoCount[genotype.getNo(A, B)]; // AB
+		int homc = Math.max(genoCount[AA],
+				genoCount[BB]); // AA/BB中大的一个
+		int homr = Math.min(genoCount[AA],
+				genoCount[BB]); // AA/BB中小的一个
+		int hets = genoCount[AB]; // AB
 		// TODO: 转移
 		return hwe(hets, homc, homr);
 	}
@@ -205,11 +295,44 @@ public class Snp {
 	}
 
 	private boolean judgeBad(Setting rc) {
-		if (alleleFreq[base.N()] > rc.MAXN || maf < rc.MAF || hw < rc.HWE) {
+		if (alleleFreq[base.N()] > rc.getMAXN() || maf < rc.getMAF()
+				|| hw < rc.getHWE()) {
 			return true;
 		} else {
 			return false;
 		}
+	}
+	
+	private void setOR(int[] status){
+		int a, b, c, d, i, l = status.length;
+		a = b = c = d = 0;
+		for(i = 0; i < l; i++){
+			if(status[i] == -1 || genos[i] == 0){
+				continue;
+			}
+			if(status[i] == 0){
+				switch(genos[i]){
+				case 1: c += 2; break;   // AA
+				case 2: c++; d++; break; // AB
+				case 3: d += 2; break;
+				default: break;
+				}
+			}else{
+				switch(genos[i]){
+				case 1: a += 2; break;   // AA
+				case 2: a++; b++; break; // AB
+				case 3: b += 2; break;
+				default: break;
+				}
+			}
+		}
+
+		OR orv = new OR();
+		double[] ors = orv.getOR_CI(a, b, c, d);
+		or = ors[0];
+		orLow = ors[1];
+		orHigh = ors[2];
+		
 	}
 
 }
