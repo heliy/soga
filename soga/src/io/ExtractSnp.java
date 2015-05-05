@@ -32,6 +32,7 @@ public class ExtractSnp {
 		splitFlag = rc.getFileSplit();
 		head = rc.getHEAD();
 		samples = rc.getSAMPLES();
+        ignoreGenotypeException = rc.isIgnoreGenotypeException();
 	}
 
 	public Snp nextSnp() throws FileNotFoundException, AlleleException, GenoTypeException, SnpContainsException{
