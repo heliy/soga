@@ -18,7 +18,7 @@ public class Setting {
 //	private int[] valids;
 	
 	private String fileSplit = "\t";
-	private boolean ignoreGenotypeException;
+	private boolean ignoreGenotypeException = false;
 
 	// QC
 	private double NNRatio = 0.05;
@@ -140,15 +140,15 @@ public class Setting {
 				if(HWE < 0 || HWE > 1){
 					throw new ArgsException("Unvalid Ratio of Hardy–Weinberg equilibrium.");					
 				}
-			}else if(arg.equals("-maxn")){
-				i++;
-				if((i == args.length) || args[i].charAt(0) == '-'){
-					throw new ArgsException("No Limit Ratio of N in one Snp.");
-				}
-				MAXN = Double.parseDouble(args[i]);
-				if(MAXN < 0 || MAXN > 1){
-					throw new ArgsException("Unvalid Limit Ratio of N in one Snp.");					
-				}
+//			}else if(arg.equals("-maxn")){
+//				i++;
+//				if((i == args.length) || args[i].charAt(0) == '-'){
+//					throw new ArgsException("No Limit Ratio of N in one Snp.");
+//				}
+//				MAXN = Double.parseDouble(args[i]);
+//				if(MAXN < 0 || MAXN > 1){
+//					throw new ArgsException("Unvalid Limit Ratio of N in one Snp.");					
+//				}
 			}else if(arg.equals("-minht")){
 				i++;
 				if((i == args.length) || args[i].charAt(0) == '-'){
@@ -219,8 +219,8 @@ public class Setting {
 			output = snpFile;
 		}
 		if(!BLOCK){
-			if(PHASE || CC){
-				throw new ArgsException("If you try to PHASE or take Case-Control test, you have to process BLOCK!");
+			if(PHASE){
+				throw new ArgsException("If you try to PHASE, you have to process BLOCK!");
 			}
 		}
 		return display(false);

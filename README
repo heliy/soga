@@ -63,9 +63,6 @@ A toolkit to caculate Linkage Disequilibrium and find haplotype
 
 **Quality Control**
 
-**-maxn**,	uppper bound of ratio of n in one SNP,
- **default 0.8**.
-
 **-nnratio**,	upper bound of ratio of nn genotype in one SNP,
  **default 0.05**.
 

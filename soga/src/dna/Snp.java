@@ -315,7 +315,7 @@ public class Snp {
 	}
 
 	private boolean judgeBad(Setting rc) {
-		if (alleleFreq[base.N()] > rc.getMAXN() || maf < rc.getMAF()
+		if (genoFreq[NN] > rc.getNNRatio() || maf < rc.getMAF()
 				|| hw < rc.getHWE()) {
 			return true;
 		} else {

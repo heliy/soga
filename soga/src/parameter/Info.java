@@ -28,18 +28,18 @@ public class Info {
 		ioparameters[3][0] = "**-output**";
 		ioparameters[3][1] = "specifies the files where to write the results.";
 		
-		qcparameters = new String[6][2];		
-		qcparameters[0][0] = "**-maxn**";
-		qcparameters[0][1] = "uppper bound of ratio of n in one SNP, **default 0.8**.";
-		qcparameters[1][0] = "**-nnratio**";
-		qcparameters[1][1] = "upper bound of ratio of nn genotype in one SNP, **default 0.05**.";
-		qcparameters[2][0] = "**-maf**";
-		qcparameters[2][1] = "lower bound of MAF(Minor Allele Frequency), **default 0.01.**";
-		qcparameters[3][0] = "**-hwe**";
-		qcparameters[3][1] = "lower bound of HWE(Hardy–Weinberg equilibrium), **default 0.001.**";
-		qcparameters[4][0] = "**--ignoreGenotypeException**";
-		qcparameters[4][1] = "the SNP which have invalid genotype will be discarded silently.";
-		qcparameters[5][0] = "**-minHt**";
+		qcparameters = new String[5][2];		
+//		qcparameters[0][0] = "**-maxn**";
+//		qcparameters[0][1] = "uppper bound of ratio of n in one SNP, **default 0.8**.";
+		qcparameters[0][0] = "**-nnratio**";
+		qcparameters[0][1] = "upper bound of ratio of nn genotype in one SNP, **default 0.05**.";
+		qcparameters[1][0] = "**-maf**";
+		qcparameters[1][1] = "lower bound of MAF(Minor Allele Frequency), **default 0.01.**";
+		qcparameters[2][0] = "**-hwe**";
+		qcparameters[2][1] = "lower bound of HWE(Hardy–Weinberg equilibrium), **default 0.001.**";
+		qcparameters[3][0] = "**--ignoreGenotypeException**";
+		qcparameters[3][1] = "the SNP which have invalid genotype will be discarded silently.";
+		qcparameters[4][0] = "**-minHt**";
 		qcparameters[5][1] = "lower bound of ratio of haplotype when write haplotypes in __OUTPUT__.BLOCK file, **default 0.05**.";
    
 		proparameters = new String[12][2];
