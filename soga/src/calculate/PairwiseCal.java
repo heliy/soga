@@ -248,7 +248,7 @@ public class PairwiseCal {
 			num = aa_bb - ab_ba;
 			swap(known);
 		}
-		aa = (prob_haps[AA] + prob_haps[AB]);
+		aa = (prob_haps[AA] + prob_haps[BA]);
 		bb = (prob_haps[BA] + prob_haps[BB]);
 		ab = (prob_haps[AA] + prob_haps[AB]);
 		ba = (prob_haps[AB] + prob_haps[BB]);
