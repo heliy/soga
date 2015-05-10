@@ -5,6 +5,7 @@ import exceptions.GenoTypeException;
 import parameter.Setting;
 import parameter.Base;
 
+import java.util.Random;
 import java.util.WeakHashMap;
 
 import calculate.OR;
@@ -196,6 +197,12 @@ public class Snp {
 			int first = base.baseNo(s.charAt(0));
 			int second = base.baseNo(s.charAt(1));
 //			System.out.println(A+", "+B);
+			if(first == N || second == N){
+				genoCount[NN]++;
+				alleleCount[N] += 2;
+				types[i][0] = types[i][1] = -1;
+				genos[i] = -1;
+			}
 			if((first != A && first != B && first != N) || (second != A && second != B && second != N)){
 				throw new GenoTypeException(s);
 			}
@@ -224,6 +231,19 @@ public class Snp {
 		double sum = len - n;
 		for (i = 1; i < 4; i++) {
 			genoFreq[i] = genoCount[i] / sum;
+		}
+		estimateNN();
+	}
+	
+	private void estimateNN(){
+		// TODO: 更高档的算法
+		Random r = new Random();
+		double p = this.alleleFreq[A];
+		for(int ts[]: types){
+			if(ts[0] == -1){
+				ts[0] = r.nextDouble() < p ? (0) : (1);
+				ts[1] = r.nextDouble() < p ? (0) : (1);
+			}
 		}
 	}
 
