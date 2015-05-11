@@ -49,10 +49,8 @@ public class LDPro {
 		Iterator<Snp> iter = snps.iterator();
 		while (iter.hasNext()) {
 			Snp mae = iter.next();
-			String s = mae.getChr() + "\t" + mae.getRs() + "\t" + mae.getA()
-					+ "/" + mae.getB() + "\t" + mae.getPosition() + "\t"
-					+ snp.getRs() + "\t" + snp.getA() + "/" + snp.getB() + "\t"
-					+ snp.getPosition() + "\t";
+			String s = mae.getChr() + "\t" + mae.getRs() + "\t" + mae.getPosition() + "\t"
+					+ snp.getRs() + "\t" + snp.getPosition() + "\t";
 			LD ld = mae.getLD(cal, snp);
 			summary.add(ld);
 			writer.write(s + ld.toString());

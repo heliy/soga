@@ -1,0 +1,15 @@
+BEGIN: Mon May 11 10:39:41 CST 2015
+END: Mon May 11 10:39:54 CST 2015
+Snp Files: exsample/lit.FILTER
+Sample Info File: exsample/lit.info
+OUTPUT File:
+exsample/lit.FILTER.LD
+Samples:
+	Total: 286
+	Cases: 14
+	Controls: 272
+	Unknowns: 0
+SNPS: 	Count 	passQC
+total: 	1919	1919
+chr21: 	11	11
+chr22: 	1908	1908
