@@ -1,5 +1,5 @@
-BEGIN: Sun May 10 16:08:17 CST 2015
-END: Sun May 10 16:08:18 CST 2015
+BEGIN: Fri May 15 15:21:29 CST 2015
+END: Fri May 15 15:21:30 CST 2015
 Snp Files: exsample/lit
 Sample Info File: exsample/lit.info
 OUTPUT File:
@@ -7,8 +7,8 @@ exsample/lit.CHECK
 exsample/lit.FILTER
 Samples:
 	Total: 286
-	Cases: 14
-	Controls: 272
+	Cases: 15
+	Controls: 271
 	Unknowns: 0
 SNPS: 	Count 	passQC
 total: 	2000	1919

@@ -148,7 +148,7 @@ GPLv3
 $ git clone https://github.com/heliy/soga.git
 $ cd soga
 $ java -jar soga.jar -snpfile exsample/lit -sampleinfo \
-> exsample/lit.info -filesplit " " --check --filter
+> exsample/lit.info -filesplit " " --check --filter --cc
 SNP data file: exsample/lit
 Sample Info file: exsample/lit.info
 OUTPUT: exsample/lit
