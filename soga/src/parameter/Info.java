@@ -40,7 +40,7 @@ public class Info {
 		qcparameters[3][0] = "**--ignoreGenotypeException**";
 		qcparameters[3][1] = "the SNP which have invalid genotype will be discarded silently.";
 		qcparameters[4][0] = "**-minHt**";
-		qcparameters[5][1] = "lower bound of ratio of haplotype when write haplotypes in __OUTPUT__.BLOCK file, **default 0.05**.";
+		qcparameters[4][1] = "lower bound of ratio of haplotype when write haplotypes in __OUTPUT__.BLOCK file, **default 0.05**.";
    
 		proparameters = new String[12][2];
 		proparameters[0][0] = "**-threads**";
@@ -50,8 +50,9 @@ public class Info {
 		proparameters[2][0] = "**--phase**";
 		proparameters[2][1] = "to phase samples in blocks, output as __OUTPUT__.PHASED, MUST also have `--block`.";
 		proparameters[3][0] = "**--cc**";
-		proparameters[3][1] = "to do case-control test in 1)SNP, have OR value in __OUTPUT__.CHECK, or, 2)haplotypes, output in __OUTPUT__.BLOCK;"
-				+ "if you have `--block` and `--phase` in parameters, it will do 1) and 2), otherwise, soga just do 1).";
+		proparameters[3][1] = "to do case-control test(include OR and  chi-square) in 1)SNP, in __OUTPUT__.CHECK, and, 2)haplotypes, "
+				+ " in __OUTPUT__.BLOCK; if you have `--block` and `--phase` in parameters, SOGA will do 1) and 2),"
+				+ " otherwise, it just do 1).";
 		proparameters[4][0] = "**--tag**";
 		proparameters[4][1] = "to find tag SNP in blocks, output in __OUTPUT__.BLOCK, MUST also have `--block`";
 		proparameters[5][0] = "**--check**";
@@ -117,7 +118,7 @@ public class Info {
 		sb.append("\t**Quality Control**\n");
 		sb.append(paras(qcparameters));
 		
-		sb.append("\n**INPUT REQUIREMENT\n");
+		sb.append("\n**INPUT REQUIREMENT**\n");
 		sb.append(paras(inputrequire));
 		
 		sb.append("\n**VERSION**\t"+version+"\n");
