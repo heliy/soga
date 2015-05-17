@@ -8,6 +8,7 @@ import parameter.Base;
 import java.util.Random;
 import java.util.WeakHashMap;
 
+import calculate.FitTest;
 import calculate.OR;
 import calculate.PairwiseCal;
 
@@ -33,6 +34,8 @@ public class Snp {
 	private int genoCount[]; // count of genotypes of genos
 	private double genoFreq[]; // frequency of genotypes
 	private double hw; // hardy-weinberg p value
+	private double aPValue; // allele A p value of case/control test
+	private double bPValue; // allele b p value of case/control test
 	private double or; // ORrate
 	private double orLow;  // OR置信区间
 	private double orHigh; // OR置信区间
@@ -54,7 +57,7 @@ public class Snp {
 		pws = new WeakHashMap<Snp, LD>(); // 与其他snp的LD值
 		or = -1;
 		if(rc.doCC()){
-			setOR(rc.getStatus());
+			setCC(rc.getStatus(), rc.getFreqs());
 		}
 	}
 	
@@ -74,7 +77,7 @@ public class Snp {
 				+ genoCount[BB] + "\t" + genoFreq[BB] + "\t" + genoCount[NN]
 				+ "\t" + genoFreq[NN] + "\t" + maf + "\t" + hw + "\t";
 		if(or >= 0){
-			s += or+"\t"+orLow+"\t"+orHigh+"\t";
+			s += aPValue+"\t"+bPValue+"\t"+or+"\t"+orLow+"\t"+orHigh+"\t";
 		}
 		if (isBad) {
 			s += "NO";
@@ -141,7 +144,7 @@ public class Snp {
 		return genoFreq;
 	}
 
-	public double getHw() {
+	public double getHWE() {
 		return hw;
 	}
 
@@ -323,21 +326,21 @@ public class Snp {
 		}
 	}
 	
-	private void setOR(int[] status){
+	private void setCC(int[] status, double[] excepted){
 		int a, b, c, d, i, l = status.length;
 		a = b = c = d = 0;
 		for(i = 0; i < l; i++){
 			if(status[i] == -1 || genos[i] == 0){
 				continue;
 			}
-			if(status[i] == 0){
+			if(status[i] == 0){          // control
 				switch(genos[i]){
 				case 1: c += 2; break;   // AA
 				case 2: c++; d++; break; // AB
 				case 3: d += 2; break;
 				default: break;
 				}
-			}else{
+			}else{                       // case
 				switch(genos[i]){
 				case 1: a += 2; break;   // AA
 				case 2: a++; b++; break; // AB
@@ -346,6 +349,15 @@ public class Snp {
 				}
 			}
 		}
+		/*
+		 * -----------------
+		 *        | A  | B
+		 * -----------------
+		 *  case  | a  | b
+		 * -----------------
+		 * control| c  | d
+		 * -----------------
+		 */
 
 		OR orv = new OR();
 		double[] ors = orv.getOR_CI(a, b, c, d);
@@ -353,6 +365,14 @@ public class Snp {
 		orLow = ors[1];
 		orHigh = ors[2];
 		
+		FitTest fit = new FitTest(excepted);
+		double[] observed = new double[2];
+		observed[0] = a;
+		observed[1] = c;
+		this.aPValue = fit.test(observed);
+		observed[0] = b;
+		observed[1] = d;
+		this.bPValue = fit.test(observed);
 	}
 
 }

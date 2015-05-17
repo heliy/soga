@@ -14,7 +14,7 @@ public class CheckFp extends FileOutput {
 	public CheckFp(Setting rc) throws FileNotFoundException {
 		super(rc, "CHECK", head);
 		if(rc.doCC()){
-			super.writeline("OR\tOR_CI_Low\tOR_CI_High\tPASS\n");
+			super.writeline("A_pvalue\tB_pvalue\tOR\tOR_CI_Low\tOR_CI_High\tPASS\n");
 		}else{
 			super.writeline("PASS\n");
 		}

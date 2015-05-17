@@ -3,14 +3,24 @@ package calculate;
 public class OR {
         private double LIMIT1 = 0.00000001;
         private double LIMIT2 = 999999999.0;
-	public double[] getOR_CI(double counts, double d, double counts2, double e){
+		/*
+		 * -----------------
+		 *        | A  | B
+		 * -----------------
+		 *  case  | a  | b
+		 * -----------------
+		 * control| c  | d
+		 * -----------------
+		 */
+
+	public double[] getOR_CI(double a, double b, double c, double d){
 		double[] ors = new double[3];
-		ors[0] = limit((counts*e+0.01)/(d*counts2+0.01));
+		ors[0] = limit((a*d+0.01)/(b*c+0.01));
 		double t = 0;
-		if(counts != 0){ t += 1.0/counts; }
+		if(a != 0){ t += 1.0/a; }
+		if(b != 0){ t += 1.0/b; }
+		if(c != 0){ t += 1.0/c; }
 		if(d != 0){ t += 1.0/d; }
-		if(counts2 != 0){ t += 1.0/counts2; }
-		if(e != 0){ t += 1.0/e; }
 		t = Math.sqrt(t);
 		
 		ors[1] = limit(Math.exp(Math.log(ors[0])-1.96*t));
