@@ -23,10 +23,10 @@ A toolkit to caculate Linkage Disequilibrium and find haplotype
 **--phase**,	to phase samples in blocks, output as
  __OUTPUT__.PHASED, MUST also have `--block`.
 
-**--cc**,	to do case-control test in 1)SNP, have OR value
- in __OUTPUT__.CHECK, and, 2)haplotypes, output in
-  __OUTPUT__.BLOCK; if you have `--block` and `--phase` in
-   parameters, SOGA will do 1) and 2), otherwise, it just do 1).
+**--cc**,	to do case-control test(include OR and 
+ chi-square) in 1)SNP, in __OUTPUT__.CHECK, and, 2)haplotypes,  
+ in __OUTPUT__.BLOCK; if you have `--block` and `--phase` in
+ parameters, SOGA will do 1) and 2), otherwise, it just do 1).
 
 **--tag**,	to find tag SNP in blocks, output in
  __OUTPUT__.BLOCK, MUST also have `--block`
@@ -133,10 +133,6 @@ GPLv3
 2. Caculate iHS.(for Positive Selection)
 
 3. Input Genetic Map to caculate recombination rates between SNPs.
-
-4. Process in X/Y Chromosome and Family Dataset.
-
-5. Input File from PLINK format.
 
 42. So Long, and Thanks for All the Algorithms. ：）
 
