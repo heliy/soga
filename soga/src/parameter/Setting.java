@@ -212,8 +212,8 @@ public class Setting {
 		if(snpFile == null){
 			throw new ArgsException("MUST have snp input file!");
 		}
-		if(sampleFile == null){
-			throw new ArgsException("MUST have sample info file!");
+		if(sampleFile == null && CC){
+			throw new ArgsException("If you want to take case/control test, you MUST have sample info file!");
 		}
 		if(output == null){
 			output = snpFile;
