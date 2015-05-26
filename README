@@ -138,36 +138,36 @@ GPLv3
 
 ------------------
 
-# EXSAMPLE
+# example
 
 ```Shell
 $ git clone https://github.com/heliy/soga.git
 $ cd soga
-$ java -jar soga.jar -snpfile exsample/lit -sampleinfo \
-> exsample/lit.info -filesplit " " --check --filter --cc
-SNP data file: exsample/lit
-Sample Info file: exsample/lit.info
-OUTPUT: exsample/lit
+$ java -jar soga.jar -snpfile example/lit -sampleinfo \
+> example/lit.info -filesplit " " --check --filter --cc
+SNP data file: example/lit
+Sample Info file: example/lit.info
+OUTPUT: example/lit
 cases: 14
 controls: 272
 unknowns: 0
 
 caculate? [Y/N]:y
 ==============================================
-Output: exsample/lit.CHECK
-Output: exsample/lit.FILTER
+Output: example/lit.CHECK
+Output: example/lit.FILTER
 New Chromesome: chr21
 New Chromesome: chr22
-Close: exsample/lit.CHECK
-Close: exsample/lit.FILTER
+Close: example/lit.CHECK
+Close: example/lit.FILTER
 ==============================================
 BEGIN: Mon Apr 20 17:21:09 CST 2015
 END: Mon Apr 20 17:21:09 CST 2015
-Snp Files: exsample/lit
-Sample Info File: exsample/lit.info
+Snp Files: example/lit
+Sample Info File: example/lit.info
 OUTPUT File:
-exsample/lit.CHECK
-exsample/lit.FILTER
+example/lit.CHECK
+example/lit.FILTER
 Samples:
 	Total: 286
 	Cases: 14
@@ -182,31 +182,31 @@ chr22: 	1982	1908
 ---------------------------------------------
 
 ```Shell
-$ java -jar soga.jar -snpfile exsample/lit.FILTER -sampleinfo \ 
-> exsample/lit.info -filesplit " " -output exsample/lit_no_phase \
+$ java -jar soga.jar -snpfile example/lit.FILTER -sampleinfo \ 
+> example/lit.info -filesplit " " -output example/lit_no_phase \
 > --block -threads 4
-SNP data file: exsample/lit.FILTER
-Sample Info file: exsample/lit.info
-OUTPUT: exsample/lit_no_phase
+SNP data file: example/lit.FILTER
+Sample Info file: example/lit.info
+OUTPUT: example/lit_no_phase
 cases: 14
 controls: 272
 unknowns: 0
 find block, 
 caculate? [Y/N]:y
 ==============================================
-Output: exsample/lit_no_phase.BLOCK
+Output: example/lit_no_phase.BLOCK
 New Chromesome: chr21
 Find new Haplotype blocks: 2
 New Chromesome: chr22
 Find new Haplotype blocks: 354
-Close: exsample/lit_no_phase.BLOCK
+Close: example/lit_no_phase.BLOCK
 ==============================================
 BEGIN: Mon Apr 20 17:32:51 CST 2015
 END: Mon Apr 20 17:33:04 CST 2015
-Snp Files: exsample/lit.FILTER
-Sample Info File: exsample/lit.info
+Snp Files: example/lit.FILTER
+Sample Info File: example/lit.info
 OUTPUT File:
-exsample/lit_no_phase.BLOCK
+example/lit_no_phase.BLOCK
 Samples:
 	Total: 286
 	Cases: 14
@@ -225,12 +225,12 @@ chr22: 	354
 ----------------------------
 
 ```Shell
-$java -jar soga.jar -snpfile exsample/lit.FILTER -sampleinfo\
-> exsample/lit.info -filesplit " " -output\
-> exsample/lit_with_phase -threads 4 --block --cc --tag --phase
-SNP data file: exsample/lit.FILTER
-Sample Info file: exsample/lit.info
-OUTPUT: exsample/lit.FILTER
+$java -jar soga.jar -snpfile example/lit.FILTER -sampleinfo\
+> example/lit.info -filesplit " " -output\
+> example/lit_with_phase -threads 4 --block --cc --tag --phase
+SNP data file: example/lit.FILTER
+Sample Info file: example/lit.info
+OUTPUT: example/lit.FILTER
 cases: 14
 controls: 272
 unknowns: 0
@@ -238,22 +238,22 @@ excepted distribution: 0.04895104895104895, 0.951048951048951
 find block, phase, case-control test, tag, 
 caculate? [Y/N]:y
 ==============================================
-Output: exsample/lit_with_phase.BLOCK
-Output: exsample/lit_with_phase.PHASED
+Output: example/lit_with_phase.BLOCK
+Output: example/lit_with_phase.PHASED
 New Chromesome: chr21
 Find new Haplotype blocks: 2
 New Chromesome: chr22
 Find new Haplotype blocks: 354
-Close: exsample/lit_with_phase.BLOCK
-Close: exsample/lit_with_phase.PHASED
+Close: example/lit_with_phase.BLOCK
+Close: example/lit_with_phase.PHASED
 ==============================================
 BEGIN: Mon Apr 20 17:46:14 CST 2015
 END: Mon Apr 20 18:02:33 CST 2015
-Snp Files: exsample/lit.FILTER
-Sample Info File: exsample/lit.info
+Snp Files: example/lit.FILTER
+Sample Info File: example/lit.info
 OUTPUT File:
-exsample/lit_with_phase.PHASED
-exsample/lit_with_phase.BLOCK
+example/lit_with_phase.PHASED
+example/lit_with_phase.BLOCK
 Samples:
 	Total: 286
 	Cases: 14
@@ -274,7 +274,7 @@ chr22: 	354
 
 -----------------------------------
 
-There are results in exsample/lit_with_phase.BLOCK:
+There are results in example/lit_with_phase.BLOCK:
 
 >> Block_ID(1)
 chrome(chr21)	begin_position(16053791)	end_position(16054740)	number_of_snps(3)	rs_ID_1st(rs11703994)	rs_ID_2nd(rs3013006)	rs_ID_3rd(rs55926024)
