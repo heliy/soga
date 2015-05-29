@@ -42,7 +42,7 @@ public class Info {
 		qcparameters[4][0] = "**-minHt**";
 		qcparameters[4][1] = "lower bound of ratio of haplotype when write haplotypes in __OUTPUT__.BLOCK file, **default 0.05**.";
    
-		proparameters = new String[12][2];
+		proparameters = new String[13][2];
 		proparameters[0][0] = "**-threads**";
 		proparameters[0][1] = "the number of threads that SOGA uses, **defualt 2**.";
 		proparameters[1][0] = "**--block**";
@@ -67,8 +67,10 @@ public class Info {
 		proparameters[9][1] = "MAX distance in calculate LDs in adjacent SNPs, **DEFAULT 1000**(bp).";
 		proparameters[10][0] = "**-window**";
 		proparameters[10][1] = "the size of snps in one window, **DEFAULT 1000.**";
-		proparameters[11][0] = "**--help**";
-		proparameters[11][1] = "print THIS help.";
+		proparameters[11][0] = "**--silence**";
+		proparameters[11][1] = "running without asking confirmation";
+		proparameters[12][0] = "**--help**";
+		proparameters[12][1] = "print THIS help.";
 		
 		inputrequire = new String[2][2];
 		inputrequire[0][0] = "**SNP DATA**";

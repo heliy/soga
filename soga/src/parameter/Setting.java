@@ -18,7 +18,6 @@ public class Setting {
 //	private int[] valids;
 	
 	private String fileSplit = "\t";
-	private boolean ignoreGenotypeException = false;
 
 	// QC
 	private double NNRatio = 0.05;
@@ -66,6 +65,10 @@ public class Setting {
 	private boolean PHASE = false;
 	private boolean TAG = false;
 	private boolean CC = false;
+	
+	// 运行
+	private boolean ignoreGenotypeException = false;
+	private boolean silence = false;
 
 	public boolean parseArgs(String[] args) throws ArgsException, FileNotFoundException, SampleStatusException{
 		int i, l = args.length;
@@ -205,6 +208,8 @@ public class Setting {
 				TAG = true;
 			}else if(arg.equals("--ignoregenotypeexception")){
 				ignoreGenotypeException = true;
+			}else if(arg.equals("--silence")){
+				silence = true;
 			}else{
 				throw new ArgsException("UNKNOWN Parameter: "+args[i]);
 			}
@@ -283,7 +288,10 @@ public class Setting {
 			return false;
 		}
 		System.out.println();
-		System.out.print("caculate? [Y/N]:");
+		if(this.silence){
+			return true;
+		}
+		System.out.print("caculate? [Y/N]:");	
 		@SuppressWarnings("resource")
 		Scanner in = new Scanner(System.in);
 		String answer = in.next();
@@ -355,7 +363,7 @@ public class Setting {
 	}
 
 	public double getD() {
-		return D;
+		return D;	
 	}
 
 	public void setD(float d) {
@@ -598,5 +606,13 @@ public class Setting {
 
 	public void setHtminratio(double htminratio) {
 		this.htminratio = htminratio;
+	}
+
+	public boolean isSilence() {
+		return silence;
+	}
+
+	public void setSilence(boolean silence) {
+		this.silence = silence;
 	}
 }

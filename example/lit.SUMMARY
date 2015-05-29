@@ -1,10 +1,10 @@
-BEGIN: Sun May 17 17:24:38 CST 2015
-END: Sun May 17 17:24:40 CST 2015
-Snp Files: exsample/lit
-Sample Info File: exsample/lit.info
+BEGIN: Fri May 29 15:50:35 CST 2015
+END: Fri May 29 15:50:37 CST 2015
+Snp Files: example/lit
+Sample Info File: example/lit.info
 OUTPUT File:
-exsample/lit.CHECK
-exsample/lit.FILTER
+example/lit.CHECK
+example/lit.FILTER
 Samples:
 	Total: 286
 	Cases: 15
