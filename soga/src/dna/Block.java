@@ -86,64 +86,6 @@ public class Block implements Comparable<Block> {
 //		System.out.println(i+", "+n);
 	}
 	
-	private void multithreads(Setting rc) throws InterruptedException{
-		threads = rc.getThreads();
-		genosPerThreads = new int[threads][2];
-		int i, n;
-		n = (samples/threads)+1;
-		for(i = 0; i < threads; i++){
-			genosPerThreads[i][0] = i*n;
-			genosPerThreads[i][1] = Math.min((i+1)*n, samples);
-//			System.out.println(i+": "+genosPerThreads[i][0]+", "+genosPerThreads[i][1]);
-		}
-		
-		htall = new HaploType[samples*2];
-		Phase[] phases = new Phase[threads];
-		Thread[] runs = new Thread[threads];
-		CountDownLatch latch = new CountDownLatch(threads);
-		for(i = 0; i < threads; i++){
-			phases[i] = new Phase(snps, genosPerThreads[i][0], genosPerThreads[i][1], rc, latch);
-		    runs[i] = new Thread(phases[i]);
-		}
-		for(i = 0; i < threads; i++){
-			runs[i].start();
-		}
-		latch.await();
-		
-		HaploType[] hts;
-		int c = 0, d, j;
-		for(i = 0; i < threads; i++){
-			hts = phases[i].getHts();
-            d = hts.length;
-			for(j = 0; j < d; j++){
-//    			if(hts[j] == null){
-//    				System.out.println("Ooooooops!");
-//    			}
-				htall[c++] = hts[j];
-			}
-		}
-//		System.out.println(c);
-	}
-	
-//	private void putin(ArrayList<HaploType> htlist, HaploType haploType, int statu) {
-//		Iterator<HaploType> iter = htlist.iterator();
-//		HaploType ht = null, in;
-//		while(iter.hasNext()){
-//			in = iter.next();
-//			if(in.equals(haploType)){
-//				ht = in;
-//				break;
-//			}
-//		}
-//		if(ht == null){
-//			haploType.add(statu);
-//			htlist.add(haploType);
-//		}else{
-//			ht.add(statu);
-//		}
-//		
-//	}
-//
 	public void setTags(boolean[] bs){
 		isTag = bs;
 	}
@@ -209,20 +151,6 @@ public class Block implements Comparable<Block> {
 		return s.toString();
 	}
 	
-	public String phasedInfo(){
-		StringBuffer sb = new StringBuffer();
-		int i, j;
-		Base base = new Base();
-		for(i = 0; i < num; i++){
-			sb.append(snps[i].getRs());
-			for(j = 0; j < samples; j++){
-//				System.out.println(haplotypes.length);
-				sb.append("\t"+base.getBase(htall[j*2].getAlleles()[i])+"/"+base.getBase(htall[j*2+1].getAlleles()[i]));
-			}
-			sb.append("\n");
-		}
-		return sb.toString();
-	}
 
 	// 按起始位置升续
 	public int compareTo(Block arg) {

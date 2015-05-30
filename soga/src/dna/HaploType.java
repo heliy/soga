@@ -38,6 +38,18 @@ public class HaploType  implements Comparable<HaploType> {
 		return pvalue;
 	}
 
+        public double getOR(){
+	        return or;
+        }
+
+        public double getOrLow(){
+	        return orLow;
+        }
+
+        public double getOrHigh(){
+	        return orHigh;
+        }
+
 	public void setPvalue(double pvalue, double or, double orLow, double orHigh) {
 		this.pvalue = pvalue;
 		this.or = or;
@@ -151,6 +163,11 @@ public class HaploType  implements Comparable<HaploType> {
 
 	public int getSampleNo() {
 		return sampleNo;
+	}
+
+	public void extend(HaploType haploType) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

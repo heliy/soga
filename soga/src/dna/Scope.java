@@ -6,7 +6,7 @@ public class Scope implements Comparable<Scope> {
 	private int end;
 	private int len;
 	
-	public Scope(int b,int e){
+	public Scope(int b, int e){
 		begin = b;
 		end = e;
 		len = e - b + 1;
