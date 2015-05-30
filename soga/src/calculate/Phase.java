@@ -8,10 +8,8 @@ import dna.HaploType;
 import dna.Snp;
 
 public class Phase implements Runnable {
-	private HaploType[] htall; // 所有单体型
-	private int htbegin;
-	private int htend;
-	
+	private HaploType[] hts; // 所有单体型
+
 	static private int B; // B个一段
 	static private int T; // T = 2**B
 	static private double LIMIT = 0.0001;// 最小概率
@@ -21,14 +19,14 @@ public class Phase implements Runnable {
 	private int N; // 样本个数
 	private int K; // 考虑的备选单体型数
 	private int bits[][]; // 段内单体型的0/1
-	private int hetes[]; // 每个样本的AB型个数
+	private int hete; // 样本的AB型个数
+	private boolean ishete[]; // 内是否是AB型
 
 	private int genotypes[][]; // 基因型
 	private int H[][]; // 备选单体型
 	private int getH[][]; // 表示H[j]是从第i个基因型中选出的
 	private int genoHs[]; // 从第i个基因型中选出几个
 
-	private Snp snps[];
 	private double lamb; // lambda
 	private double thetas[]; // e^(-ro/K)
 	private double unthetas[]; // (1-e^(-ro/K))/K
@@ -37,49 +35,94 @@ public class Phase implements Runnable {
 	private double PZ1; // P(Z1 = u) = 1/K
 
 	CountDownLatch latch;
+	private int end;
+	private Snp[] endSnps;
+	private Snp[] snps;
+	private Snp[] next;
 	
-	public Phase(Snp[] Snps, int htBegin, int htEnd, Setting rc, CountDownLatch latch) {
+	private int sample;
+
+	public void setRun(Snp[] snps, CountDownLatch latch) {
+		this.next = snps;
 		this.latch = latch;
-		
-		int i, j, sum, hNum;
-		double selectp, distance;
-		int types[][], pows[];
-		
-		htbegin = htBegin;
-		htend = htEnd; 
+	}
+	
+	public void clearHistory(){
+		this.end = -1;
+		this.endSnps = new Snp[0];		
+	}
+	
+	public Phase(int sample, Setting rc) {
 		B = rc.getB();
 		T = (int) Math.pow(2, B);
 		N = rc.getSAMPLES();
 		K = rc.getK();
+		
+		this.sample = sample;		
+		this.clearHistory();
+	}
+	
+	public HaploType[] phase(Snp[] snps){
 
-		snps = Snps;
-		L = snps.length;
+		HaploType[] hts = new HaploType[2];
+		int i, j, types[][];
+		hete = i = 0;
+		this.snps = new Snp[snps.length+this.endSnps.length];
+		L = this.snps.length;
+		genotypes = new int[N][L];		
+
+		// 基因型
+		for (i = 0; i < L; i++) {
+			types = this.snps[i].getTypes();
+			for(j = 0; j < N; j++){
+    			genotypes[j][i] = types[sample][0]+types[sample][1];
+			}
+			ishete[i] = (genotypes[sample][i] == 1);
+			hete += (ishete[i]?1:0);
+		}
+
+		if(hete < 2){
+			j = snps.length;
+			int[][] diplos = new int[2][j];
+			int k = endSnps.length;
+			for (i = 0; i < j; i++) {
+				if (genotypes[sample][i+k] == 1) {
+					diplos[0][i] = snps[i].getA();
+					diplos[1][i] = snps[i].getB();
+				} else if (genotypes[sample][i+k] == 0) {
+					diplos[1][i] = diplos[0][i] = snps[i].getA();
+				} else {
+					diplos[1][i] = diplos[0][i] = snps[i].getB();
+				}
+			}
+			hts[0] = new HaploType(diplos[0], sample);
+			hts[1] = new HaploType(diplos[1], sample);
+
+			this.clearHistory();
+			return hts;			
+		}
+		
+		int sum, hNum;
+		double selectp, distance;
+		int pows[], hetes[];
 		lamb = getLambda();
 		thetas = new double[L];
 		unthetas = new double[L];
 		mafs = new double[L];
-		genotypes = new int[N][L];
+		pows = new int[N]; 
 		hetes = new int[N];
-		pows = new int[N];
 
-//		System.out.println(L + ", " + N + ", " + K);
+		// System.out.println(L + ", " + N + ", " + K);
 
 		GeneticDistance gd = new GeneticDistance();
-		mafs[0] = snps[0].getMaf();
+		mafs[0] = this.snps[0].getMaf();
 		for (i = 1; i < L; i++) {
-			distance = gd.ditance(snps[i - 1], snps[i]);
+			distance = gd.ditance(this.snps[i - 1], this.snps[i]);
 			thetas[i] = Math.exp((-4) * Ne * distance / (double) K);
 			unthetas[i] = (1 - thetas[i]) / K;
-			mafs[i] = snps[i].getMaf();
+			mafs[i] = this.snps[i].getMaf();
 		}
 
-		// 基因型
-		for (i = 0; i < L; i++) {
-			types = snps[i].getTypes();
-			for (j = 0; j < N; j++) {
-				genotypes[j][i] = types[j][0] + types[j][1];
-			}
-		}
 
 		sum = 0;
 		for (i = 0; i < N; i++) {
@@ -87,7 +130,7 @@ public class Phase implements Runnable {
 			for (j = 0; j < L; j++) {
 				hetes[i] += (genotypes[i][j] == 1) ? (1) : (0);
 			}
-//			System.out.println(i+": "+hetes[i]);
+			// System.out.println(i+": "+hetes[i]);
 			pows[i] = ((int) Math.pow(2, hetes[i])) % K;
 			sum += pows[i];
 		}
@@ -125,60 +168,30 @@ public class Phase implements Runnable {
 		for (i = 0; i < T; i++) {
 			sum = i;
 			// i二进制化
+			// eg i=5时为 [1, 0, 1]
 			for (j = 0; j < B; j++) {
 				bits[i][j] = sum % 2;
 				sum /= 2;
 			}
 		}
 		PZ1 = 1.0 / K;
-	}
-	
-	public void run(){
-		int i, n = 0;
-		htall = new HaploType[(htend-htbegin)*2];
-//		System.out.println("----"+htend+", "+htbegin+": "+htall.length);
-		HaploType[] hts;
-		for(i = htbegin; i < htend; i++){
-			hts = phase(i);
-//			System.out.println(hts[]);
-			htall[n++] = hts[0];
-			htall[n++] = hts[1];
-		}
-		latch.countDown();
-	}
-	
-	public HaploType[] getHts(){
-		return htall;
+		
+		return this.shapeit(sample, end);
 	}
 
-	public HaploType[] phase(int index) {
-//		System.out.println(index + ": " + hetes[index]);
-		if (hetes[index] < 2) {
-			HaploType[] hts = new HaploType[2];
-			int[][] diplos = new int[2][L];
-			int i;
-			for (i = 0; i < L; i++) {
-				if (genotypes[index][i] == 1) {
-					diplos[0][i] = snps[i].getA();
-					diplos[1][i] = snps[i].getB();
-				} else if (genotypes[index][i] == 0) {
-					diplos[1][i] = diplos[0][i] = snps[i].getA();
-				} else {
-					diplos[1][i] = diplos[0][i] = snps[i].getB();
-				}
-			}
-			hts[0] = new HaploType(diplos[0], index);
-			hts[1] = new HaploType(diplos[1], index);
-			return hts;
-		} else {
-			return shapeit(index);
-		}
+	public void run() {
+		hts = phase(this.next);
 	}
 
-	private HaploType[] shapeit(int genoIndex) {
+	public HaploType[] getHts() {
+		return hts;
+	}
+
+
+	private HaploType[] shapeit(int genoIndex, int init) {
 		// 计算用
-	    int S[] = new int[L]; // 分段
-		int A[][] = new int[K][L] ; // 断内可能单体型
+		int S[] = new int[L]; // 分段
+		int A[][] = new int[K][L]; // 断内可能单体型
 		double alpha[][][] = new double[L][T][K]; // 前向概率
 		double beta[][][] = new double[L][T][K]; // 后向概率
 		double sumsOneAll[] = new double[T]; // 行和
@@ -199,7 +212,7 @@ public class Phase implements Runnable {
 				inNo++;
 			}
 			S[i] = segNo;
-//			System.out.println(i + ": " + S[i]);
+			// System.out.println(i + ": " + S[i]);
 			if (inNo == B) {
 				segNo++;
 				inNo = 0;
@@ -302,28 +315,33 @@ public class Phase implements Runnable {
 
 		m = maxi = 0;
 		pmax = 0.0;
-		for (i = 0; i < T / 2; i++) {
-			j = getCp(i);
-			for (tmp = u = 0; u < K; u++) {
-				tmp += alpha[m][i][u] * beta[m][i][u];
-			}
-			nextalpha = tmp;
-			for (tmp = u = 0; u < K; u++) {
-				tmp += alpha[m][j][u] * beta[m][i][u];
-			}
-			tmp *= nextalpha;
-			if (tmp > pmax) {
-				pmax = tmp;
-				maxi = i;
+		if (init < 0) {
+			for (i = 0; i < T / 2; i++) {
+				j = getCp(i);
+				for (tmp = u = 0; u < K; u++) {
+					tmp += alpha[m][i][u] * beta[m][i][u];
+				}
+				nextalpha = tmp;
+				for (tmp = u = 0; u < K; u++) {
+					tmp += alpha[m][j][u] * beta[m][i][u];
+				}
+				tmp *= nextalpha;
+				if (tmp > pmax) {
+					pmax = tmp;
+					maxi = i;
+				}
 			}
 			X1[0] = maxi;
 			X2[0] = getCp(maxi);
+		}else{
+			X1[0] = init;
+			X2[0] = getCp(init);
 		}
- //       System.out.println(S[L-1]);		
-		if (S[L-1] > 0) {
+		// System.out.println(S[L-1]);
+		if (S[L - 1] > 0) {
 			while (true) {
 				m++;
-//                System.out.println(m);
+				// System.out.println(m);
 				// 计算前一个位点到这个位点的转移概率
 				for (i = 0; i < T; i++) {
 					for (j = 0; j < T; j++) {
@@ -331,7 +349,8 @@ public class Phase implements Runnable {
 						for (u1 = 0; u1 < K; u1++) {
 							for (u2 = 0; u2 < K; u2++) {
 								tmpsum += (alpha[m - 1][i][u1]
-										* pZlZlm1(m, u2, u1) * pXlZl(A, m, j, u2) * beta[m][j][u2]);
+										* pZlZlm1(m, u2, u1)
+										* pXlZl(A, m, j, u2) * beta[m][j][u2]);
 							}
 						}
 						inturn[i][j] = tmpsum;
@@ -368,7 +387,7 @@ public class Phase implements Runnable {
 					}
 					X1[S[m]] = maxi;
 					X2[S[m - 1]] = getCp(maxi);
-					if (S[m] == S[L-1]) {
+					if (S[m] == S[L - 1]) {
 						break;
 					}
 					for (i = 0; i < T; i++) {
@@ -382,37 +401,38 @@ public class Phase implements Runnable {
 		}
 
 		HaploType[] hts = new HaploType[2];
-		int[] ht1 = new int[L];
-		int[] ht2 = new int[L];
+		int e = this.endSnps.length;
+		int[] ht1 = new int[L-e];
+		int[] ht2 = new int[L-e];
 		int a, b;
-		for (i = 0; i < L; i++) {
+		for (i = endSnps.length; i < L; i++) {
 			a = snps[i].getA();
 			b = snps[i].getB();
 			ht1[i] = (A[X1[S[i]]][i] == 0) ? (a) : (b);
 			ht2[i] = (A[X2[S[i]]][i] == 0) ? (a) : (b);
 		}
+		
+	    int[] hetes = new int[B];
+	    end = 0;
+	    for(i = L-1, j = 0; i >= e && j < B; i--){
+	    	if(genotype[i] == 1){
+	    		hetes[B-j-1] = i;
+	    		if(A[X1[S[i]]][i] == 1){
+    	    		end += (int)Math.pow(2, j);
+	    		}
+	    		j++;
+	    	}
+	    }
+		endSnps = new Snp[L-hetes[j-1]];
+		for(i = hetes[j-1]; i < L; i++){
+			endSnps[i] = this.snps[i];
+		}
+		
 		hts[0] = new HaploType(ht1, genoIndex);
 		hts[1] = new HaploType(ht2, genoIndex);
 		
-		update(genoIndex, ht1, ht2);
-		
 		return hts;
-	}
-	
-	private void update(int geno, int[] ht1, int[] ht2){
-        int i, j, k, n = genoHs[geno], ht[];
-        Random r = new Random();
-        for(i = 0; i < n; i++){
-        	if(r.nextBoolean()){
-        		ht = ht1;
-        	}else{
-        		ht = ht2;
-        	}
-        	k = getH[geno][i];
-        	for(j = 0; j < L; j++){
-        		H[k][j] = ht[j];
-        	}
-        }
+		
 	}
 
 	private int getCp(int i) {
@@ -429,7 +449,7 @@ public class Phase implements Runnable {
 	// P(Zl = u| Zl-1 = v)
 	// P(Zsnp = ht1| Zsnp-1 = ht2)
 	private double pZlZlm1(int snpIndex, int ht1, int ht2) {
-//		System.out.println(snpIndex);
+		// System.out.println(snpIndex);
 		double theta = thetas[snpIndex];
 		double untheta = unthetas[snpIndex];
 		if (ht1 == ht2) {
