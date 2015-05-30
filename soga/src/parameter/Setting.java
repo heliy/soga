@@ -41,6 +41,7 @@ public class Setting {
 	// Phase 暂不作为用户参数设定
 	private int B = 3;
 	private int K = 200;
+	private int phaseWindow = 2000000;
 	
 	// case-control
 	private int[] status;  // -1 未知 0 正常 1对照 
@@ -614,5 +615,13 @@ public class Setting {
 
 	public void setSilence(boolean silence) {
 		this.silence = silence;
+	}
+
+	public int getPhaseWindow() {
+		return phaseWindow;
+	}
+
+	public void setPhaseWindow(int phaseWindow) {
+		this.phaseWindow = phaseWindow;
 	}
 }

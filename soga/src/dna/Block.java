@@ -1,18 +1,16 @@
 package dna;
 
+import io.PhasedFp;
+
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.concurrent.CountDownLatch;
 
-import parameter.Base;
+import control.PhasePro;
 import parameter.Setting;
 import calculate.FitTest;
 import calculate.OR;
-import calculate.Phase;
 
 public class Block implements Comparable<Block> {
-	private static int threads;
-	private static int[][] genosPerThreads;
 	
 	private int up;
 	private int down;
@@ -26,7 +24,6 @@ public class Block implements Comparable<Block> {
 	private static int caseHts;
 	private static int controlHts;
 	private HaploType[] haplotypes = null;
-	private HaploType[] htall;
 	private boolean[] isTag = null;
 	private int minht;
 
@@ -43,19 +40,28 @@ public class Block implements Comparable<Block> {
 		}
 	}
 	
-	public void phase(Setting rc) throws InterruptedException {
+	public void phase(Setting rc, PhasedFp writer) throws InterruptedException {
 		samples = rc.getSAMPLES();
 		freqs = rc.getFreqs();
 		caseHts = rc.getCases()*2;
 		controlHts = rc.getControls()*2;
 		
 		minht = (int)(rc.getHtminratio()*this.samples*2);
-//		System.out.println(minht);
-		multithreads(rc);
-		int i, n = htall.length;
-		HaploType[] hts = new HaploType[n];
-		for(i = 0; i < n; i++){
-			hts[i] = htall[i];
+		
+		PhasePro pro = new PhasePro(rc, writer);
+		PhasedRange range = new PhasedRange(rc);
+		for(Snp snp: snps){
+			PhasedRange next = pro.add(snp);
+			if(next != null){
+				range.extend(next);
+			}
+		}
+		
+		int i;
+		HaploType[] hts = new HaploType[samples*2];
+		for(i = 0; i < samples; i++){
+			hts[2*i] = range.getHaploTypes()[i][0];
+			hts[2*i+1] = range.getHaploTypes()[i][1];
     	}
 		
 		int[] status = rc.getStatus();
@@ -65,7 +71,7 @@ public class Block implements Comparable<Block> {
 		i = 0; 
 		mae = new HaploType(hts[0].getAlleles(), 0);
 		mae.add(status[mae.getSampleNo()]);
-		for(i = 1; i < n; i++){
+		for(i = 1; i < samples; i++){
 //			System.out.println(hts[i]);
 			if(hts[i].equals(mae)){
 				mae.add(status[hts[i].getSampleNo()]);
@@ -79,10 +85,10 @@ public class Block implements Comparable<Block> {
 		haplotypes = new HaploType[htlist.size()];
 		htlist.toArray(haplotypes);
 		Arrays.sort(haplotypes);
-		n = 0;
-		for(HaploType ht: haplotypes){
-			n += ht.getNum();
-		}
+//		int n = 0;
+//		for(HaploType ht: haplotypes){
+//			n += ht.getNum();
+//		}
 //		System.out.println(i+", "+n);
 	}
 	

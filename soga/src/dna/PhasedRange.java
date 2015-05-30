@@ -1,17 +1,28 @@
 package dna;
 
 import parameter.Base;
+import parameter.Setting;
 
 public class PhasedRange {
 	private Snp[] snps;
 	private HaploType[][] hts;
+	
+	public PhasedRange(Setting rc){
+		this.snps = new Snp[0];
+		int i, n = rc.getSAMPLES();
+		this.hts = new HaploType[n][2];
+		for(i = 0; i < n; i++){
+			hts[i][0] = new HaploType(i);
+			hts[i][1] = new HaploType(1);
+		}		
+	}
 	
 	public PhasedRange(Snp[] snps, HaploType[][] hts){
 		this.snps = snps;
 		this.hts = hts;
 	}
 	
-	public void merge(PhasedRange nextRange){
+	public void extend(PhasedRange nextRange){
 		Snp[] nextSnps, newSnps;
 		HaploType[][] nextHts = nextRange.getHaploTypes();
 		nextSnps = nextRange.getSnps();

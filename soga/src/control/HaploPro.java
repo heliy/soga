@@ -170,8 +170,7 @@ public class HaploPro {
 				writer.writeline(">> "+blockNo+"\n");
 				if(phased != null){
 					phased.writeline(">> "+blockNo+"\n");
-					b.phase(rc);
-					phased.write(b.phasedInfo());
+					b.phase(rc, phased);
 				}
 				blockNo++;
 				if(tag != null){
