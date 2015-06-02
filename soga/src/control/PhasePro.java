@@ -10,6 +10,7 @@ import dna.PhasedRange;
 import dna.Snp;
 import io.PhasedFp;
 import parameter.Setting;
+import parameter.Summary;
 
 public class PhasePro {
 	private int THREADS;
@@ -20,9 +21,13 @@ public class PhasePro {
 	private int[] threadsPerRounds;
 	private Thread[] runs;
 	private ArrayList<Snp> snplist;
+	
+	private Summary summary;
 
-	public PhasePro(Setting rc) throws FileNotFoundException {
+	public PhasePro(Setting rc, Summary summary) throws FileNotFoundException {
 		this.writer = new PhasedFp(rc);
+		this.summary = summary;
+		this.summary.add(this.writer);
 		this.alloc(rc);
 	}
 
@@ -30,7 +35,7 @@ public class PhasePro {
 		this.writer = writer;
 		this.alloc(rc);
 	}
-
+	
 	public PhasedRange add(Snp snp) throws InterruptedException {
 		if(this.snplist.size() != 0 && snp.getChr() != this.snplist.get(0).getChr()){
 			PhasedRange range = this.close(false);

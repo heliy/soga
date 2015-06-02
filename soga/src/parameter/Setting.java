@@ -41,7 +41,8 @@ public class Setting {
 	// Phase 暂不作为用户参数设定
 	private int B = 3;
 	private int K = 200;
-	private int phaseWindow = 2000000;
+	// 窗口大小， 参数
+	private int phaseWINDOW = 2000000;
 	
 	// case-control
 	private int[] status;  // -1 未知 0 正常 1对照 
@@ -49,6 +50,8 @@ public class Setting {
 	private int controls;
 	private int unknowns;
 	private double[] freqs;
+	
+	// 全SNP分相
 	
 	// IO
 	private String snpFile = null;
@@ -66,6 +69,7 @@ public class Setting {
 	private boolean PHASE = false;
 	private boolean TAG = false;
 	private boolean CC = false;
+	private boolean FULL = false;
 	
 	// 运行
 	private boolean ignoreGenotypeException = false;
@@ -174,11 +178,20 @@ public class Setting {
 			}else if(arg.equals("-window")){
 				i++;
 				if((i == args.length) || args[i].charAt(0) == '-'){
-					throw new ArgsException("No Max Distance Limitation in the Process of Caculation of LD.");
+					throw new ArgsException("No window size while using sliding window approach to find haplotype block.");
 				}
-				SIZE = Integer.parseInt(args[i]);
+				SIZE = this.parseWindow(args[i]);
 				if(SIZE < 0){
-					throw new ArgsException("Unvalid Max Distance Limitation.");					
+					throw new ArgsException("Unvalid Window Size.");					
+				}
+			}else if(arg.equals("-phase-window")){
+				i++;
+				if((i == args.length) || args[i].charAt(0) == '-'){
+					throw new ArgsException("No window size while using sliding window approach to phase.");
+				}
+				this.phaseWINDOW = this.parseWindow(args[i]);
+				if(this.phaseWINDOW < 0){
+					throw new ArgsException("Unvalid Window Size.");					
 				}
 			}else if(arg.equals("-threads")){
 				i++;
@@ -197,6 +210,8 @@ public class Setting {
 				FILTER = true;
 			}else if(arg.equals("--badddata")){
 				BADDATA = true;
+			}else if(arg.equals("--full")){
+				FULL = true;
 			}else if(arg.equals("--block")){
 				BLOCK = true;
 //			}else if(arg.equals("--recom")){
@@ -230,6 +245,10 @@ public class Setting {
 			}
 		}
 		return display(false);
+	}
+	
+	private int parseWindow(String argument){
+		return Integer.parseInt(argument);
 	}
 	
 	@SuppressWarnings("resource")
@@ -273,7 +292,7 @@ public class Setting {
 		if(BLOCK){
 			System.out.print("find block, ");
 		}
-		if(PHASE){
+		if(PHASE || FULL){
 			System.out.print("phase, ");
 		}
 		if(CC){
@@ -285,7 +304,7 @@ public class Setting {
 		if(LD){
 			System.out.println("ld, ");
 		}
-		if(!CHECK && !FILTER && !BADDATA && !LD && !BLOCK && !TAG){
+		if(!CHECK && !FILTER && !BADDATA && !LD && !BLOCK && !TAG && !FULL){
 			return false;
 		}
 		System.out.println();
@@ -301,6 +320,14 @@ public class Setting {
 		}else{
 			return true;
 		}
+	}
+
+	public boolean doFULL() {
+		return FULL;
+	}
+
+	public void setFULL() {
+		FULL = true;
 	}
 	
 	public boolean doCC() {
@@ -618,10 +645,11 @@ public class Setting {
 	}
 
 	public int getPhaseWindow() {
-		return phaseWindow;
+		return phaseWINDOW;
 	}
 
 	public void setPhaseWindow(int phaseWindow) {
-		this.phaseWindow = phaseWindow;
+		this.phaseWINDOW = phaseWindow;
 	}
+
 }

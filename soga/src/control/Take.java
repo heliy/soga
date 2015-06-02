@@ -22,14 +22,16 @@ public class Take {
 	private Setting rc;
 	private ExtractSnp input = null;
 	
-	private CheckFp check = null;
-	private FilterFp filter = null;
-	private BadFp bad = null;
+	private PhasePro full = null;
 	
 	private LDPro ld = null;
 	private HaploPro block = null;
 	private HaploPro recom = null;
 
+	private CheckFp check = null;
+	private FilterFp filter = null;
+	private BadFp bad = null;
+	
 	private String chr;
 	private boolean renew;
 	
@@ -40,7 +42,6 @@ public class Take {
 		summary = new Summary(rc);
 
 		input = new ExtractSnp(rc);
-		
 		if(rc.doCHECK()){
 			check = new CheckFp(rc);
 			summary.add(check);
@@ -54,14 +55,18 @@ public class Take {
 		    summary.add(bad);
 		}
 		
-		if(rc.doLD()){
-			ld = new LDPro(rc, summary);
-		}
-		if(rc.doBLOCK()){
-			block = new HaploPro(rc, summary, true);
-		}
-		if(rc.doRECOM()){
-			recom = new HaploPro(rc, summary, false);
+		if(rc.doFULL()){
+			full = new PhasePro(rc, summary);
+		}else{
+			if(rc.doLD()){
+				ld = new LDPro(rc, summary);
+			}
+			if(rc.doBLOCK()){
+				block = new HaploPro(rc, summary, true);
+			}
+			if(rc.doRECOM()){
+				recom = new HaploPro(rc, summary, false);
+			}
 		}
 		chr = null;
 		renew = false;
@@ -91,26 +96,33 @@ public class Take {
 				filter.write(line);
 			}
 			if(renew){
-					if(ld != null){
-						ld.restart();
-					}
-					if(block != null){
-						block.restart(summary);
-					}
-					if(recom != null){
-						recom.restart(summary);
-						System.out.println("RESTART");
-					}
+				    if(full != null){
+				    	full.restart();
+				    }else{
+				    	if(ld != null){
+				    		ld.restart();
+				    	}
+				    	if(block != null){
+				    		block.restart(summary);
+				    	}
+				    	if(recom != null){
+				    		recom.restart(summary);
+				    	}
+				    }
 			}
 			if(!snp.isBad()){
-				if(ld != null){
-					ld.add(snp, summary);
-				}
-				if(block != null){
-					block.add(snp, summary);
-				}
-				if(recom != null){
-					recom.add(snp, summary);
+				if(full != null){
+					full.add(snp); 
+				}else{
+					if(ld != null){
+						ld.add(snp, summary);
+					}
+					if(block != null){
+						block.add(snp, summary);
+					}
+					if(recom != null){
+						recom.add(snp, summary);
+					}
 				}
 			}
 			if(renew){
@@ -119,7 +131,9 @@ public class Take {
 			}
 			snp = input.nextSnp();
 		}
-		
+		if(full != null){
+			full.close(true);
+		}
 		if(check != null){
 			check.close();
 		}
