@@ -142,7 +142,7 @@ public class HaploType implements Comparable<HaploType> {
 		controlNum++;
 	}
 
-	public int compareTo(HaploType other) { // 数目降序
+	public int compareTo(HaploType other) { // 数目降序 数目相同时按碱基类型排列
 		int d = other.getNum() - this.getNum(), i;
 		if (d != 0) {
 			return d;

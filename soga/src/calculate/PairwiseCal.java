@@ -59,6 +59,7 @@ public class PairwiseCal {
 		}
 //		System.out.println(testcal(known, unknown).toString());
 //		System.out.println(cal(known, unknown).toString());
+//		System.out.println(known[0]+", "+known[1]+", "+known[2]+", "+known[3]+": "+unknown);
 
 		return cal(known, unknown);
 	}

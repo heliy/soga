@@ -65,11 +65,19 @@ public class Phase implements Runnable {
 	public HaploType[] phase(Snp[] snps){
 
 		HaploType[] hts = new HaploType[2];
-		int i, j, types[][];
+		int i, j, n, types[][];
 		hete = i = 0;
 		this.snps = new Snp[snps.length+this.endSnps.length];
 		L = this.snps.length;
-		genotypes = new int[N][L];		
+		this.genotypes = new int[N][L];
+		this.ishete = new boolean[L];
+		
+		for(i = 0, n = this.endSnps.length; i < n; i++){
+			this.snps[i] = this.endSnps[i];
+		}
+		for(j = 0, n = snps.length; j < n; j++){
+			this.snps[i+j] = snps[j];
+		}
 
 		// 基因型
 		for (i = 0; i < L; i++) {
@@ -101,6 +109,7 @@ public class Phase implements Runnable {
 			this.clearHistory();
 			return hts;			
 		}
+		
 		
 		int sum, hNum;
 		double selectp, distance;
@@ -180,7 +189,9 @@ public class Phase implements Runnable {
 	}
 
 	public void run() {
-		hts = phase(this.next);
+		this.hts = phase(this.next);
+		this.latch.countDown();
+		return;
 	}
 
 	public HaploType[] getHts() {
@@ -405,32 +416,42 @@ public class Phase implements Runnable {
 		int[] ht1 = new int[L-e];
 		int[] ht2 = new int[L-e];
 		int a, b;
-		for (i = endSnps.length; i < L; i++) {
+		for (i = e; i < L; i++) {
 			a = snps[i].getA();
 			b = snps[i].getB();
-			ht1[i] = (A[X1[S[i]]][i] == 0) ? (a) : (b);
-			ht2[i] = (A[X2[S[i]]][i] == 0) ? (a) : (b);
+			ht1[i-e] = (A[X1[S[i]]][i] == 0) ? (a) : (b);
+			ht2[i-e] = (A[X2[S[i]]][i] == 0) ? (a) : (b);
 		}
 		
 	    int[] hetes = new int[B];
 	    end = 0;
 	    for(i = L-1, j = 0; i >= e && j < B; i--){
 	    	if(genotype[i] == 1){
-	    		hetes[B-j-1] = i;
+	    		hetes[j] = i;
 	    		if(A[X1[S[i]]][i] == 1){
     	    		end += (int)Math.pow(2, j);
 	    		}
 	    		j++;
 	    	}
 	    }
-		endSnps = new Snp[L-hetes[j-1]];
-		for(i = hetes[j-1]; i < L; i++){
-			endSnps[i] = this.snps[i];
+	    if(i < e){
+	    	i = e;
+	    }
+		endSnps = new Snp[L-i];
+		
+//		for(i = 0, a = ht1.length; i < a; i++){
+//			System.out.println(ht1[i]+" | " +ht2[i]);
+//		}
+//		System.out.println();
+		
+		for(j = i; i < L; i++){
+//			System.out.println(e+": "+i);
+			endSnps[i-j] = this.snps[i];
 		}
 		
 		hts[0] = new HaploType(ht1, genoIndex);
 		hts[1] = new HaploType(ht2, genoIndex);
-		
+
 		return hts;
 		
 	}

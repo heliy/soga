@@ -13,7 +13,7 @@ public class PhasedRange {
 		this.hts = new HaploType[n][2];
 		for(i = 0; i < n; i++){
 			hts[i][0] = new HaploType(i);
-			hts[i][1] = new HaploType(1);
+			hts[i][1] = new HaploType(i);
 		}		
 	}
 	
@@ -23,6 +23,9 @@ public class PhasedRange {
 	}
 	
 	public void extend(PhasedRange nextRange){
+		if(nextRange == null){
+			return;
+		}
 		Snp[] nextSnps, newSnps;
 		HaploType[][] nextHts = nextRange.getHaploTypes();
 		nextSnps = nextRange.getSnps();
@@ -41,6 +44,11 @@ public class PhasedRange {
 			hts[i][0].extend(nextHts[i][0]);
 			hts[i][1].extend(nextHts[i][1]);
 		}
+		
+//		for(Snp snp: this.snps){
+//			System.out.println(snp.getRs());
+//		}
+//		System.out.println();
 	}
 	
 	public Snp[] getSnps() {
@@ -58,13 +66,12 @@ public class PhasedRange {
 		for(i = 0; i < num; i++){
 			sb.append(snps[i].getChr()+"\t"+snps[i].getPosition());
 			for(j = 0; j < samples; j++){
-//				System.out.println(haplotypes.length);
+//				System.out.println(i+", "+j+": "+hts[j][0]);
 				sb.append("\t"+base.getBase(hts[j][0].getAlleles()[i])+"|"+base.getBase(hts[j][1].getAlleles()[i]));
 			}
 			sb.append("\n");
 		}
-		return sb.toString();
-		
+		return sb.toString();		
 	}
 
 }

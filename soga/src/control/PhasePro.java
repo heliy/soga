@@ -32,6 +32,11 @@ public class PhasePro {
 	}
 
 	public PhasedRange add(Snp snp) throws InterruptedException {
+		if(this.snplist.size() != 0 && snp.getChr() != this.snplist.get(0).getChr()){
+			PhasedRange range = this.close(false);
+			this.snplist.add(snp);
+			return range;
+		}
 		snplist.add(snp);
 		if (this.needCal()) {
 			PhasedRange range = this.run();
@@ -52,7 +57,6 @@ public class PhasePro {
 
 	public PhasedRange close(boolean writerNeed) throws InterruptedException {
 		PhasedRange range = this.run();
-		writer.write(range);
 		this.restart();
 		if (writerNeed) {
 			writer.close();
@@ -64,7 +68,7 @@ public class PhasePro {
 		int i, j, r, n = rc.getSAMPLES();
 		this.THREADS = rc.getThreads();
 		this.phases = new Phase[n];
-		this.runs = new Thread[this.THREADS];
+		this.rounds = new int[n];
 		this.window = rc.getPhaseWindow();
 		this.snplist = new ArrayList<Snp>();
 
@@ -84,9 +88,19 @@ public class PhasePro {
 		for(i = 0; i <= r; i++){
 			this.threadsPerRounds[i] = this.THREADS;
 		}
-		if(j != this.THREADS){
+		if(j != this.THREADS && j != 0){
 			this.threadsPerRounds[r] = j;
 		}
+		
+//		for(i = 0; i < n; i++){
+//			System.out.print(this.rounds[i]+", ");
+//		}
+//		System.out.println();
+//		for(int s : this.threadsPerRounds){
+//			System.out.print(s+", ");
+//		}
+//		System.out.println();
+		
 	}
 
 	private boolean needCal() {
@@ -98,20 +112,22 @@ public class PhasePro {
 		Snp[] snps = new Snp[snplist.size()];
 		snplist.toArray(snps);
 		
-		int i, j, k, r, n = this.phases.length;
+		int i, j, k = 0, r = 0, n = this.phases.length;
 		int maxR = this.rounds[n-1];
 		HaploType[][] hts = new HaploType[n][2];
-		for(i = 0; i < maxR; i++){
+		for(i = 0; i <= maxR; i++){
 			r = this.threadsPerRounds[i];
 			CountDownLatch latch = new CountDownLatch(r);
 			k = i*this.THREADS;
+			this.runs = new Thread[r];
 			
 			for(j = 0; j < r; j++){
 				this.phases[k+j].setRun(snps, latch);
-				this.runs[i] = new Thread(this.phases[k+j]);
+				this.runs[j] = new Thread(this.phases[k+j]);
 			}
+			
 			for(j = 0; j < r; j++){
-				runs[i].start();
+				runs[j].start();
 			}
 			latch.await();
 			
@@ -119,8 +135,9 @@ public class PhasePro {
 				hts[k+j] = this.phases[k+j].getHts();
 			}
 		}
-		
-		return new PhasedRange(snps, hts);
+		PhasedRange range = new PhasedRange(snps, hts);
+		this.writer.write(range);
+		return range;
 
 	}
 

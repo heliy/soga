@@ -45,20 +45,19 @@ public class Block implements Comparable<Block> {
 		freqs = rc.getFreqs();
 		caseHts = rc.getCases()*2;
 		controlHts = rc.getControls()*2;
+
+		int i, n = this.samples*2;
 		
-		minht = (int)(rc.getHtminratio()*this.samples*2);
+		minht = (int)(rc.getHtminratio()*n);
 		
 		PhasePro pro = new PhasePro(rc, writer);
 		PhasedRange range = new PhasedRange(rc);
 		for(Snp snp: snps){
-			PhasedRange next = pro.add(snp);
-			if(next != null){
-				range.extend(next);
-			}
+			range.extend(pro.add(snp));
 		}
+		range.extend(pro.close(false));
 		
-		int i;
-		HaploType[] hts = new HaploType[samples*2];
+		HaploType[] hts = new HaploType[n];
 		for(i = 0; i < samples; i++){
 			hts[2*i] = range.getHaploTypes()[i][0];
 			hts[2*i+1] = range.getHaploTypes()[i][1];
@@ -68,16 +67,15 @@ public class Block implements Comparable<Block> {
 		Arrays.sort(hts);
 		ArrayList<HaploType> htlist = new ArrayList<HaploType>();
 		HaploType mae;
-		i = 0; 
 		mae = new HaploType(hts[0].getAlleles(), 0);
 		mae.add(status[mae.getSampleNo()]);
-		for(i = 1; i < samples; i++){
+		for(i = 1; i < n; i++){
 //			System.out.println(hts[i]);
 			if(hts[i].equals(mae)){
 				mae.add(status[hts[i].getSampleNo()]);
 			}else{
 				htlist.add(mae.clone());
-				mae = new HaploType(hts[i].getAlleles(), 0);
+				mae = new HaploType(hts[i].getAlleles(), hts[i].getSampleNo());
 				mae.add(status[mae.getSampleNo()]);
 			}
 		}

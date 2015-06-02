@@ -200,14 +200,17 @@ public class Snp {
 			int first = base.baseNo(s.charAt(0));
 			int second = base.baseNo(s.charAt(1));
 //			System.out.println(A+", "+B);
+			if((first != A && first != B && first != N) || (second != A && second != B && second != N)){
+				throw new GenoTypeException(s);
+			}
+			
 			if(first == N || second == N){
+				// 缺失的
 				genoCount[NN]++;
 				alleleCount[N] += 2;
 				types[i][0] = types[i][1] = -1;
 				genos[i] = -1;
-			}
-			if((first != A && first != B && first != N) || (second != A && second != B && second != N)){
-				throw new GenoTypeException(s);
+				continue;
 			}
 			if (first > second) { // 保证 first 的序号小于 second
 				int tmp = second;

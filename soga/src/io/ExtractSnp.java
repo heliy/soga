@@ -108,7 +108,7 @@ public class ExtractSnp {
 		}
 		alleles[0] = base.baseNo(ts.charAt(0));
 		alleles[1] = base.baseNo(ts.charAt(2));
-		if(alleles[0] < 0 || alleles[1] < 0){
+		if(alleles[0] < 0 || alleles[1] < 0 || alleles[0] == alleles[1]){
 			throw new AlleleException();
 		}
 		if (alleles[0] > alleles[1]) { // 保证 A 的序号小于 B
