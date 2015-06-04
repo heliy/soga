@@ -227,6 +227,12 @@ public class Setting {
 				BADDATA = true;
 			}else if(arg.equals("--full")){
 				FULL = true;
+			}else if(arg.equals("--gwhas")){
+				BLOCK = true;
+				PHASE = true;
+				CC = true;
+				TAG = true;
+				CHECK = true;
 			}else if(arg.equals("--block")){
 				BLOCK = true;
 //			}else if(arg.equals("--recom")){
@@ -253,6 +259,9 @@ public class Setting {
 		}
 		if(output == null){
 			output = snpFile;
+		}
+		if(this.FULL && this.BLOCK){
+			this.PHASE = true;
 		}
 		if(!BLOCK){
 			if(PHASE){
