@@ -33,7 +33,8 @@ public class Setting {
 	private double EHRCU = 0.9;
 	
 	// Block
-	private int SIZE = 1000;
+	private int HTWINDOW = 4000;
+	private int RHWINDOW = 200;
 //	private int MAXSIZE = 2000;
 //	private int WIN = -1;
 	private double D = 0.95; //暂不作为用户参数设定
@@ -57,19 +58,23 @@ public class Setting {
 	private String snpFile = null;
 	private String sampleFile = null;
 	private String output = null;
+	private String phasedFile = null;
 	private double htminratio = 0.05;
 	
 	// 处理
-	private boolean LD = false;
+	private boolean FULL = false;
+	
 	private boolean CHECK = false;
 	private boolean FILTER = false;
 	private boolean BADDATA = false;
+
+	private boolean LD = false;
 	private boolean BLOCK = false;
 	private boolean RECOM = false;
 	private boolean PHASE = false;
 	private boolean TAG = false;
 	private boolean CC = false;
-	private boolean FULL = false;
+	
 	
 	// 运行
 	private boolean ignoreGenotypeException = false;
@@ -93,6 +98,16 @@ public class Setting {
 				if((i == args.length) || snpFile.charAt(0) == '-'){
 					throw new ArgsException("No Input Snp File.");
 				}
+			}else if(arg.equals("-phasedfile")){
+				i++;
+				if(i == l){
+					throw new ArgsException("No Input Sample Info File.");
+				}
+				this.phasedFile = args[i];
+				if((i == args.length) || phasedFile.charAt(0) == '-'){
+					throw new ArgsException("No Input Phased SNP File.");
+				}
+				parseStatus();
 			}else if(arg.equals("-sampleinfo")){
 				i++;
 				if(i == l){
@@ -175,13 +190,13 @@ public class Setting {
 				if(DISTANCE < 0){
 					throw new ArgsException("Unvalid Max Distance Limitation.");					
 				}
-			}else if(arg.equals("-window")){
+			}else if(arg.equals("-ht-window")){
 				i++;
 				if((i == args.length) || args[i].charAt(0) == '-'){
 					throw new ArgsException("No window size while using sliding window approach to find haplotype block.");
 				}
-				SIZE = this.parseWindow(args[i]);
-				if(SIZE < 0){
+				this.HTWINDOW = this.parseWindow(args[i]);
+				if(this.HTWINDOW < 0){
 					throw new ArgsException("Unvalid Window Size.");					
 				}
 			}else if(arg.equals("-phase-window")){
@@ -302,12 +317,15 @@ public class Setting {
 			System.out.print("tag, ");
 		}
 		if(LD){
-			System.out.println("ld, ");
+			System.out.print("ld, ");
 		}
-		if(!CHECK && !FILTER && !BADDATA && !LD && !BLOCK && !TAG && !FULL){
-			return false;
+		if(RECOM){
+			System.out.print("recombination hotspots, ");
 		}
 		System.out.println();
+		if(!CHECK && !FILTER && !BADDATA && !LD && !BLOCK && !TAG && !FULL && !RECOM){
+			return false;
+		}
 		if(this.silence){
 			return true;
 		}
@@ -320,6 +338,22 @@ public class Setting {
 		}else{
 			return true;
 		}
+	}
+
+	public void cancelBADDATA(){
+		this.BADDATA = false;
+	}
+	
+	public void cancelFILTER(){
+		this.FILTER = false;
+	}
+	
+	public void cancelFULL(){
+		this.FULL = false;
+	}
+	
+	public void cancelCHECK(){
+		this.CHECK = false;
 	}
 
 	public boolean doFULL() {
@@ -523,14 +557,6 @@ public class Setting {
 		EHRCU = eHRCU;
 	}
 
-	public int getSIZE() {
-		return SIZE;
-	}
-
-	public void setSIZE(int sIZE) {
-		SIZE = sIZE;
-	}
-
 //	public int getMAXSIZE() {
 //		return MAXSIZE;
 //	}
@@ -644,12 +670,52 @@ public class Setting {
 		this.silence = silence;
 	}
 
-	public int getPhaseWindow() {
+	public int getPhaseWINDOW() {
 		return phaseWINDOW;
 	}
 
-	public void setPhaseWindow(int phaseWindow) {
+	public void setPhaseWINDOW(int phaseWindow) {
 		this.phaseWINDOW = phaseWindow;
+	}
+
+	public int getHTWINDOW() {
+		return HTWINDOW;
+	}
+
+	public void setHTWINDOW(int hTWINDOW) {
+		HTWINDOW = hTWINDOW;
+	}
+
+	public int getRHWINDOW() {
+		return RHWINDOW;
+	}
+
+	public void setRHWINDOW(int rHWINDOW) {
+		RHWINDOW = rHWINDOW;
+	}
+	
+	public int getSIZE(boolean isBlock){
+		if(isBlock){
+			return this.HTWINDOW;
+		}else{
+			return this.RHWINDOW;
+		}
+	}
+
+	public String getPhasedFile() {
+		return phasedFile;
+	}
+
+	public void setPhasedFile(String phasedFile) {
+		this.phasedFile = phasedFile;
+	}
+
+	public boolean needRescanPhasedFile() {
+		if(this.FULL && (this.LD || this.BLOCK)){
+			return true;
+		}else{
+			return false;
+		}
 	}
 
 }

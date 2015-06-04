@@ -40,9 +40,12 @@ public class Snp {
 	private double orLow;  // OR置信区间
 	private double orHigh; // OR置信区间
 	private boolean isBad; // is bad snp
+	
+	private boolean isPhased;
 
-	public Snp(String rsNo, int a, int b, String Chr, String sposition,
+	public Snp(boolean isPhased, String rsNo, int a, int b, String Chr, String sposition,
 			String[] parts, Setting rc) throws GenoTypeException {
+		this.isPhased = isPhased;
 		// rs, alleles, chr, position, genos....
 		rs = rsNo;
 		position = Integer.parseInt(sposition); // 所在位置
@@ -59,6 +62,10 @@ public class Snp {
 		if(rc.doCC()){
 			setCC(rc.getStatus(), rc.getFreqs());
 		}
+	}
+	
+	public boolean isPhased(){
+		return this.isPhased;
 	}
 	
 	public int hashCode(){
@@ -199,6 +206,9 @@ public class Snp {
 			s = parts[i];
 			int first = base.baseNo(s.charAt(0));
 			int second = base.baseNo(s.charAt(1));
+			if(this.isPhased){
+				second = base.baseNo(s.charAt(2));
+			}
 //			System.out.println(A+", "+B);
 			if((first != A && first != B && first != N) || (second != A && second != B && second != N)){
 				throw new GenoTypeException(s);

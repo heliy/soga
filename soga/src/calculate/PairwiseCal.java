@@ -43,18 +43,27 @@ public class PairwiseCal {
 		int[][] twotypes = s2.getTypes();
 
 		int i;
-		for (i = 0; i < SAMPLES; i++) {
-			int[] typeOne = onetypes[i];
-			int[] typeTwo = twotypes[i];
-			if (typeOne[0] == N || typeOne[1] == N || typeTwo[0] == N
-					|| typeTwo[1] == N) {
-				continue;
-			}
-			if (typeOne[0] != typeOne[1] && typeTwo[0] != typeTwo[1]) {
-				unknown++;
-			} else {
+		if(s1.isPhased()){
+			for(i = 0; i < SAMPLES; i++){
+				int[] typeOne = onetypes[i];
+				int[] typeTwo = twotypes[i];
 				known[typeOne[0] * 2 + typeTwo[0]]++;
 				known[typeOne[1] * 2 + typeTwo[1]]++;
+			}
+		} else {
+			for (i = 0; i < SAMPLES; i++) {
+				int[] typeOne = onetypes[i];
+				int[] typeTwo = twotypes[i];
+				if (typeOne[0] == N || typeOne[1] == N || typeTwo[0] == N
+						|| typeTwo[1] == N) {
+					continue;
+				}
+				if (typeOne[0] != typeOne[1] && typeTwo[0] != typeTwo[1]) {
+					unknown++;
+				} else {
+					known[typeOne[0] * 2 + typeTwo[0]]++;
+					known[typeOne[1] * 2 + typeTwo[1]]++;
+				}
 			}
 		}
 //		System.out.println(testcal(known, unknown).toString());

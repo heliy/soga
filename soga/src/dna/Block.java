@@ -2,6 +2,7 @@ package dna;
 
 import io.PhasedFp;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -40,29 +41,44 @@ public class Block implements Comparable<Block> {
 		}
 	}
 	
-	public void phase(Setting rc, PhasedFp writer) throws InterruptedException {
+	public void phase(Setting rc, PhasedFp writer) throws InterruptedException, FileNotFoundException {
 		samples = rc.getSAMPLES();
 		freqs = rc.getFreqs();
 		caseHts = rc.getCases()*2;
 		controlHts = rc.getControls()*2;
 
-		int i, n = this.samples*2;
-		
-		minht = (int)(rc.getHtminratio()*n);
-		
-		PhasePro pro = new PhasePro(rc, writer);
-		PhasedRange range = new PhasedRange(rc);
-		for(Snp snp: snps){
-			range.extend(pro.add(snp));
-		}
-		range.extend(pro.close(false));
+		int i, j, n = this.samples*2, m;
 		
 		HaploType[] hts = new HaploType[n];
-		for(i = 0; i < samples; i++){
-			hts[2*i] = range.getHaploTypes()[i][0];
-			hts[2*i+1] = range.getHaploTypes()[i][1];
-    	}
+		minht = (int)(rc.getHtminratio()*n);
 		
+		if(this.snps[0].isPhased()){
+			m = this.snps.length;
+			int[][] alleles = new int[n][m];
+			for(i = 0; i < this.samples; i++){
+				int[][] types = this.snps[i].getTypes();
+				for(j = 0; j < m; j++){
+					alleles[i*2][m] = types[j][0];
+					alleles[i*2+1][m] = types[j][1];
+				}
+			}
+			for(i = 0; i < this.samples; i++){
+				hts[i*2] = new HaploType(alleles[i*2], i);
+				hts[i*2+1] = new HaploType(alleles[i*2+1], i);
+			}
+		}else{
+			PhasePro pro = new PhasePro(rc, writer);
+			PhasedRange range = new PhasedRange(rc);
+			for(Snp snp: snps){
+				range.extend(pro.add(snp));
+			}
+			range.extend(pro.close(false));
+			HaploType[][] all = range.getHaploTypes();
+			for(i = 0; i < samples; i++){
+				hts[2*i] = all[i][0];
+				hts[2*i+1] = all[i][1];
+	    	}
+		}
 		int[] status = rc.getStatus();
 		Arrays.sort(hts);
 		ArrayList<HaploType> htlist = new ArrayList<HaploType>();

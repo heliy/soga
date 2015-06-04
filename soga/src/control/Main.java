@@ -18,8 +18,23 @@ public class Main {
 		Setting rc = new Setting();
 		if(rc.parseArgs(args)){
 			System.out.println("==============================================");
-			Take run = new Take(rc);
-			Summary summary = run.run();
+			Summary summary = new Summary(rc);
+			if(rc.getPhasedFile() != null){              // 输入的文件是已分相的
+				Take run = new Take(true, rc, summary);
+				summary = run.run();
+			}else{
+     			Take run = new Take(false, rc, summary);         
+	    		summary = run.run();				 
+		    	if(rc.needRescanPhasedFile()){
+		    		rc.setPhasedFile(summary.getPhasedFile());
+		    		rc.cancelFULL();
+		    		rc.cancelCHECK();
+		    		rc.cancelFILTER();
+		    		rc.cancelBADDATA();
+			    	Take run2 = new Take(true, rc, summary);
+				    summary = run2.run();
+		    	}
+			}
 			System.out.println("==============================================");
 			System.out.println(summary);
 			PrintWriter writer = new PrintWriter(rc.getOutput()+".SUMMARY");

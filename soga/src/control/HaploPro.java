@@ -7,6 +7,7 @@ import java.util.Iterator;
 import calculate.FindBlock;
 import calculate.Tag;
 import dna.Block;
+import dna.PhasedRange;
 import dna.Snp;
 import io.BlockFp;
 import io.FileOutput;
@@ -30,14 +31,22 @@ public class HaploPro {
 	private int blockNo;
 	private PhasedFp phased = null;
 
+	private PhasedRange range = null;
+
 	public HaploPro(Setting Rc, Summary summary, boolean isblock) throws FileNotFoundException {
 		snplist = new ArrayList<Snp>();
 		rc = Rc;
 		isBlock = isblock;
-		SIZE = rc.getSIZE();
+		SIZE = rc.getSIZE(isblock);
 		blockNo = 0;
 		threads = rc.getThreads();
 		MAXSIZE = SIZE*threads;
+		if(rc.doFULL()){
+			this.range = new PhasedRange(rc);
+		}
+		if(rc.doTAG()){
+			tag = new Tag(rc);
+		}
 		if(isBlock){
 			writer = new BlockFp(rc);
 			if(rc.doPHASE()){
@@ -45,16 +54,13 @@ public class HaploPro {
 				summary.add(phased);
 			}
 			isCC = rc.doCC();
-			if(rc.doTAG()){
-				tag = new Tag(rc);
-			}
 		}else{
 			writer = new RecomFp(rc);
 		}
 		summary.add(writer);
 	}
 
-	private void pro(Summary summary, boolean isLast) throws InterruptedException{
+	private void pro(Summary summary, boolean isLast) throws InterruptedException, FileNotFoundException{
 		if(snplist.size() == 0){
 			return;
 		}
@@ -197,25 +203,30 @@ public class HaploPro {
 		}
 	}
 	
-	public void add(Snp snp, Summary summary) throws InterruptedException {
+	public void add(Snp snp, Summary summary) throws InterruptedException, FileNotFoundException {
 		snplist.add(snp);
 		if (snplist.size() == MAXSIZE) {
 			pro(summary, false);
 		}
 	}
 
-	public void restart(Summary summary) throws InterruptedException{
+	public void restart(Summary summary) throws InterruptedException, FileNotFoundException{
 //        System.out.println(snplist.size());
 		pro(summary, true);
 		snplist.clear();
 	}
 	
-	public void close(Summary summary) throws InterruptedException {
+	public void close(Summary summary) throws InterruptedException, FileNotFoundException {
         pro(summary, true);
 		writer.close();
 		if(phased != null){
 			phased.close();
 		}
+	}
+
+	public void add(PhasedRange range, Summary summary) throws FileNotFoundException, InterruptedException {
+		this.range.extend(range);
+		
 	}
 	
 }

@@ -33,6 +33,7 @@ public class Summary {
 	private String snpfile;
 	private String samplefile;
 	private String[] outputs;
+	private String phasedFile;
 	private int outnum;
 	
 	public Summary(Setting rc){
@@ -54,6 +55,7 @@ public class Summary {
 		blockPerChr = new HashMap<String, Long>();
 		hotspotPerChr = new HashMap<String, Long>();
 	}
+	
 	
 	public void add(FileOutput output){
 		outputs[outnum++] = output.getFileName();
@@ -172,6 +174,15 @@ public class Summary {
 			}
 		}
 		return sb.toString();
+	}
+
+	public String getPhasedFile() {
+		return this.phasedFile;
+	}
+
+
+	public void setPhasedFile(String phasedFile) {
+		this.phasedFile = phasedFile;
 	}
 
 }

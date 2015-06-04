@@ -19,6 +19,8 @@ import io.FilterFp;
 //  run()
 
 public class Take {
+	private boolean isPhased;
+	
 	private Setting rc;
 	private ExtractSnp input = null;
 	
@@ -37,41 +39,53 @@ public class Take {
 	
 	private Summary summary;
 	
-	public Take(Setting Rc) throws FileNotFoundException{
-		rc = Rc;
-		summary = new Summary(rc);
-
-		input = new ExtractSnp(rc);
+	
+	public void take(boolean isPhased, Setting rc, Summary summary) throws FileNotFoundException{
+		this.isPhased = isPhased;
+		this.summary = summary;
+		this.rc = rc;
+		this.input = new ExtractSnp(this.rc, this.isPhased);
 		if(rc.doCHECK()){
-			check = new CheckFp(rc);
-			summary.add(check);
+			this.check = new CheckFp(this.rc);
+			this.summary.add(this.check);
 		}
     	if(rc.doFILTER()){
-	    	filter = new FilterFp(rc);
-	    	summary.add(filter);
+    		this.filter = new FilterFp(this.rc);
+    		this.summary.add(this.filter);
 		}
 		if(rc.doBAD()){
-			bad = new BadFp(rc);
-		    summary.add(bad);
+			this.bad = new BadFp(this.rc);
+			this.summary.add(this.bad);
 		}
 		
 		if(rc.doFULL()){
-			full = new PhasePro(rc, summary);
+			this.full = new PhasePro(this.rc, this.summary);
 		}else{
 			if(rc.doLD()){
-				ld = new LDPro(rc, summary);
+				this.ld = new LDPro(this.rc, this.summary);
 			}
 			if(rc.doBLOCK()){
-				block = new HaploPro(rc, summary, true);
+				this.block = new HaploPro(this.rc, this.summary, true);
 			}
 			if(rc.doRECOM()){
-				recom = new HaploPro(rc, summary, false);
+				this.recom = new HaploPro(this.rc, this.summary, false);
 			}
 		}
-		chr = null;
-		renew = false;
+		this.chr = null;
+		this.renew = false;
+		if(this.isPhased){
+			this.full = null;
+		}
+	}
+	public Take(boolean isPhased, Setting Rc) throws FileNotFoundException{
+		summary = new Summary(Rc);
+		take(isPhased, rc, summary);
 	}
 
+	public Take(boolean isPhased, Setting rc2, Summary summary2) throws FileNotFoundException {
+		this.take(isPhased, rc2, summary2);		
+	}
+	
 	public Summary run() throws FileNotFoundException, AlleleException, GenoTypeException, SnpContainsException, ChromosomeSegmentException, InterruptedException{
 		String line;
    		Snp snp = input.nextSnp();

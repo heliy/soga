@@ -6,6 +6,7 @@ import java.util.Iterator;
 
 import calculate.PairwiseCal;
 import dna.LD;
+import dna.PhasedRange;
 import dna.Snp;
 import parameter.Setting;
 import parameter.Summary;
@@ -28,7 +29,11 @@ public class LDPro {
 		summary.add(writer);
 	}
 	
-	
+	public void add(PhasedRange range, Summary summary) {
+		for(Snp snp: range.getSnps()){
+			this.add(snp, summary);
+		}		
+	}
 
 	public void add(Snp snp, Summary summary) {
 		long ima = snp.getPosition();
@@ -66,5 +71,6 @@ public class LDPro {
 	public void close() {
 		writer.close();
 	}
+
 
 }

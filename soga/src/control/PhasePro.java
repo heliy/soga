@@ -11,15 +11,14 @@ import dna.Snp;
 import io.PhasedFp;
 import parameter.Setting;
 import parameter.Summary;
+import util.MultiThreads;
 
 public class PhasePro {
 	private int THREADS;
 	private PhasedFp writer;
 	private Phase[] phases;
 	private int window;
-	private int[] rounds;
-	private int[] threadsPerRounds;
-	private Thread[] runs;
+	private MultiThreads<Phase>[] runs;
 	private ArrayList<Snp> snplist;
 	
 	private Summary summary;
@@ -28,20 +27,16 @@ public class PhasePro {
 		this.writer = new PhasedFp(rc);
 		this.summary = summary;
 		this.summary.add(this.writer);
+		this.summary.setPhasedFile(this.writer.getFileName());
 		this.alloc(rc);
 	}
 
-	public PhasePro(Setting rc, PhasedFp writer) {
+	public PhasePro(Setting rc, PhasedFp writer) throws FileNotFoundException {
 		this.writer = writer;
 		this.alloc(rc);
 	}
 	
-	public PhasedRange add(Snp snp) throws InterruptedException {
-		if(this.snplist.size() != 0 && snp.getChr() != this.snplist.get(0).getChr()){
-			PhasedRange range = this.close(false);
-			this.snplist.add(snp);
-			return range;
-		}
+	public PhasedRange add(Snp snp) throws InterruptedException, FileNotFoundException {
 		snplist.add(snp);
 		if (this.needCal()) {
 			PhasedRange range = this.run();
@@ -53,59 +48,50 @@ public class PhasePro {
 		}
 	}
 
-	public void restart() {
+	public PhasedRange restart() throws FileNotFoundException, InterruptedException {
+		PhasedRange range = this.run();
 		this.snplist.clear();
 		for (Phase phase: this.phases) {
 			phase.clearHistory();
 		}
+		return range;
 	}
 
-	public PhasedRange close(boolean writerNeed) throws InterruptedException {
-		PhasedRange range = this.run();
-		this.restart();
+	public PhasedRange close(boolean writerNeed) throws InterruptedException, FileNotFoundException {
+		PhasedRange range = this.restart();
 		if (writerNeed) {
 			writer.close();
 		}
 		return range;
 	}
 
-	private void alloc(Setting rc) {
+	@SuppressWarnings("unchecked")
+	private void alloc(Setting rc) throws FileNotFoundException {
 		int i, j, r, n = rc.getSAMPLES();
 		this.THREADS = rc.getThreads();
 		this.phases = new Phase[n];
-		this.rounds = new int[n];
-		this.window = rc.getPhaseWindow();
+		this.window = rc.getPhaseWINDOW();
 		this.snplist = new ArrayList<Snp>();
+		int[] threadsNum = new int[this.THREADS];
 
 		for (i = 0; i < n; i++) {
 			this.phases[i] = new Phase(i, rc);
 		}
 		
-		for(i = 0, r = 0, j = 0; i < n; i++){
-			this.rounds[i] = r;
-			j++;
-			if(j == THREADS){
-				r++;
-				j = 0;
+		this.runs = new MultiThreads[this.THREADS];
+		for(i = 0; i < n; i++){
+			threadsNum[i%this.THREADS]++;
+		}
+		j = 0;
+		for(r = 0; r < this.THREADS; r++){
+//			System.out.println(threadsNum[r]);
+			Phase[] phs = new Phase[threadsNum[r]];
+			for(i = 0; i < phs.length; i++){
+				phs[i] = this.phases[j+i];
 			}
+			j += phs.length;
+			this.runs[r] = new MultiThreads<Phase>(phs);
 		}
-		this.threadsPerRounds = new int[r+1];
-		for(i = 0; i <= r; i++){
-			this.threadsPerRounds[i] = this.THREADS;
-		}
-		if(j != this.THREADS && j != 0){
-			this.threadsPerRounds[r] = j;
-		}
-		
-//		for(i = 0; i < n; i++){
-//			System.out.print(this.rounds[i]+", ");
-//		}
-//		System.out.println();
-//		for(int s : this.threadsPerRounds){
-//			System.out.print(s+", ");
-//		}
-//		System.out.println();
-		
 	}
 
 	private boolean needCal() {
@@ -113,33 +99,38 @@ public class PhasePro {
 				- this.snplist.get(0).getPosition() > window);
 	}
 
-	private PhasedRange run() throws InterruptedException {
+	private PhasedRange run() throws InterruptedException, FileNotFoundException {
+		if(this.snplist.size() == 0){
+			return null;
+		}
+		System.out.println(this.snplist.size());
 		Snp[] snps = new Snp[snplist.size()];
 		snplist.toArray(snps);
 		
-		int i, j, k = 0, r = 0, n = this.phases.length;
-		int maxR = this.rounds[n-1];
+		int i, n = this.phases.length;
 		HaploType[][] hts = new HaploType[n][2];
-		for(i = 0; i <= maxR; i++){
-			r = this.threadsPerRounds[i];
-			CountDownLatch latch = new CountDownLatch(r);
-			k = i*this.THREADS;
-			this.runs = new Thread[r];
-			
-			for(j = 0; j < r; j++){
-				this.phases[k+j].setRun(snps, latch);
-				this.runs[j] = new Thread(this.phases[k+j]);
-			}
-			
-			for(j = 0; j < r; j++){
-				runs[j].start();
-			}
-			latch.await();
-			
-			for(j = 0; j < r; j++){
-				hts[k+j] = this.phases[k+j].getHts();
-			}
+		
+		for(i = 0; i < n; i++){
+			this.phases[i].setRun(snps, new CountDownLatch(1));
 		}
+		
+		CountDownLatch latch = new CountDownLatch(this.THREADS);
+		Thread[] threads = new Thread[this.THREADS];
+		for(i = 0; i < this.THREADS; i++){
+			this.runs[i].setRun(latch);
+		}
+		for(i = 0; i < this.THREADS; i++){
+			threads[i] = new Thread(this.runs[i]);
+		}
+		for(i = 0; i < this.THREADS; i++){
+			threads[i].start();
+		}
+		latch.await();
+		
+		for(i = 0; i < n; i++){
+			hts[i] = this.phases[i].getHts();
+		}
+		
 		PhasedRange range = new PhasedRange(snps, hts);
 		this.writer.write(range);
 		return range;

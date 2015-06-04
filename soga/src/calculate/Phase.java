@@ -18,14 +18,12 @@ public class Phase implements Runnable {
 	private int L; // snp个数
 	private int N; // 样本个数
 	private int K; // 考虑的备选单体型数
-	private int bits[][]; // 段内单体型的0/1
+	private static int bits[][] = null; // 段内单体型的0/1
 	private int hete; // 样本的AB型个数
 	private boolean ishete[]; // 内是否是AB型
 
 	private int genotypes[][]; // 基因型
-	private int H[][]; // 备选单体型
-	private int getH[][]; // 表示H[j]是从第i个基因型中选出的
-	private int genoHs[]; // 从第i个基因型中选出几个
+	private int H[][] = null; // 备选单体型
 
 	private double lamb; // lambda
 	private double thetas[]; // e^(-ro/K)
@@ -41,6 +39,7 @@ public class Phase implements Runnable {
 	private Snp[] next;
 	
 	private int sample;
+//	private int maxDistance;
 
 	public void setRun(Snp[] snps, CountDownLatch latch) {
 		this.next = snps;
@@ -49,7 +48,8 @@ public class Phase implements Runnable {
 	
 	public void clearHistory(){
 		this.end = -1;
-		this.endSnps = new Snp[0];		
+		this.endSnps = new Snp[0];
+		this.H = null;
 	}
 	
 	public Phase(int sample, Setting rc) {
@@ -59,6 +59,7 @@ public class Phase implements Runnable {
 		K = rc.getK();
 		
 		this.sample = sample;		
+//		this.maxDistance = rc.getPhaseWINDOW()*2;
 		this.clearHistory();
 	}
 	
@@ -79,6 +80,7 @@ public class Phase implements Runnable {
 			this.snps[i+j] = snps[j];
 		}
 
+		System.out.println(this.sample+", "+this.snps.length);
 		// 基因型
 		for (i = 0; i < L; i++) {
 			types = this.snps[i].getTypes();
@@ -113,13 +115,10 @@ public class Phase implements Runnable {
 		
 		int sum, hNum;
 		double selectp, distance;
-		int pows[], hetes[];
 		lamb = getLambda();
 		thetas = new double[L];
 		unthetas = new double[L];
 		mafs = new double[L];
-		pows = new int[N]; 
-		hetes = new int[N];
 
 		// System.out.println(L + ", " + N + ", " + K);
 
@@ -132,7 +131,10 @@ public class Phase implements Runnable {
 			mafs[i] = this.snps[i].getMaf();
 		}
 
-
+		int[] pows, hetes;
+		pows = new int[N]; 
+		hetes = new int[N];
+		
 		sum = 0;
 		for (i = 0; i < N; i++) {
 			hetes[i] = 0;
@@ -146,41 +148,38 @@ public class Phase implements Runnable {
 		K = (sum < K) ? (sum) : (K);
 
 		H = new int[K][L];
-		getH = new int[N][K];
-		genoHs = new int[N];
 
 		Random r = new Random();
 		hNum = 0;
 		for (i = 0; i < N; i++) {
 			selectp = Math.max(1.0 / K, K / (N * pows[i]));
-			genoHs[i] = 0;
 			for (j = 0; j < pows[i]; j++) {
+				if (hNum == K) {
+					break;
+				}
 				if (r.nextDouble() > selectp) {
 					continue;
 				}
 				getCandidate(i, hNum);
-				getH[i][genoHs[i]++] = hNum;
 				hNum++;
-			}
-			if (hNum == K) {
-				break;
 			}
 		}
 		while (hNum < K) {
 			i = r.nextInt(N);
 			getCandidate(i, hNum);
-			getH[i][genoHs[i]++] = hNum;
 			hNum++;
-		}
+		}		
 
-		bits = new int[T][B];
-		for (i = 0; i < T; i++) {
-			sum = i;
-			// i二进制化
-			// eg i=5时为 [1, 0, 1]
-			for (j = 0; j < B; j++) {
-				bits[i][j] = sum % 2;
-				sum /= 2;
+		if(bits == null){
+			bits = new int[T][B];
+			for (i = 0; i < T; i++) {
+				sum = i;
+				// i二进制化
+				// eg i=5时为 [1, 0, 1]
+				for (j = 0; j < B; j++) {
+					bits[i][j] = sum % 2;
+					sum /= 2;
+				}
 			}
 		}
 		PZ1 = 1.0 / K;
@@ -196,6 +195,23 @@ public class Phase implements Runnable {
 
 	public HaploType[] getHts() {
 		return hts;
+	}
+	
+	private void getCandidate(int index, int h) {
+		int[] genotype = genotypes[index];
+		int i, L = genotype.length;
+		Random r = new Random();
+		for (i = 0; i < L; i++) {
+			if (genotype[i] == 1) {
+				if (r.nextDouble() < this.mafs[i]) {
+					H[h][i] = 1;
+				} else {
+					H[h][i] = 0;
+				}
+			} else {
+				H[h][i] = genotype[i] / 2;
+			}
+		}
 	}
 
 
@@ -500,23 +516,6 @@ public class Phase implements Runnable {
 
 	private double limit(double p) {
 		return Math.max(p, LIMIT);
-	}
-
-	private void getCandidate(int index, int h) {
-		int[] genotype = genotypes[index];
-		int i;
-		Random r = new Random();
-		for (i = 0; i < L; i++) {
-			if (genotype[i] == 1) {
-				if (r.nextDouble() < mafs[i]) {
-					H[h][i] = 1;
-				} else {
-					H[h][i] = 0;
-				}
-			} else {
-				H[h][i] = genotype[i] / 2;
-			}
-		}
 	}
 
 	private double getLambda() {

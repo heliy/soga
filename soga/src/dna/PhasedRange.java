@@ -64,7 +64,7 @@ public class PhasedRange {
 		int i, j, num = snps.length, samples = hts.length;
 		Base base = new Base();
 		for(i = 0; i < num; i++){
-			sb.append(snps[i].getChr()+"\t"+snps[i].getRs());
+			sb.append(snps[i].getRs()+'\t'+base.getBase(snps[i].getA())+"/"+base.getBase(snps[i].getB())+"\t"+snps[i].getChr()+"\t"+snps[i].getPosition());
 			for(j = 0; j < samples; j++){
 //				System.out.println(i+", "+j+": "+hts[j][0]);
 				sb.append("\t"+base.getBase(hts[j][0].getAlleles()[i])+"|"+base.getBase(hts[j][1].getAlleles()[i]));

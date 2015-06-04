@@ -17,7 +17,7 @@ public class Tag {
 	private PairwiseCal cal;
 	
 	public Tag(Setting rc){
-		maxNum = rc.getSIZE() + 2;
+		maxNum = Math.max(rc.getRHWINDOW(), rc.getHTWINDOW()) + 2;
 		cal = new PairwiseCal(rc);
 		R = new double[maxNum][maxNum];
 		N = new boolean[maxNum][maxNum];
