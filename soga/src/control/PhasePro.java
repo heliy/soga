@@ -13,6 +13,7 @@ import dna.Snp;
 import io.PhasedFp;
 import parameter.Setting;
 import parameter.Summary;
+import util.AllotThreads;
 import util.MultiThreads;
 
 public class PhasePro {
@@ -22,6 +23,7 @@ public class PhasePro {
 	private int window;
 	private MultiThreads<Phase>[] runs;
 	private ArrayList<Snp> snplist;
+	private AllotThreads allot;
 	
 	private Setting rc;
 	private Summary summary;
@@ -72,22 +74,19 @@ public class PhasePro {
 	@SuppressWarnings("unchecked")
 	private void alloc(Setting rc) throws FileNotFoundException {
 		int i, j, r, n = rc.getSAMPLES();
+		this.allot = new AllotThreads();
 		this.THREADS = rc.getThreads();
 		this.phases = new Phase[n];
 		this.window = rc.getPhaseWINDOW();
 		this.snplist = new ArrayList<Snp>();
-		int[] threadsNum = new int[this.THREADS];
+		this.runs = new MultiThreads[this.THREADS];
+		int[] threadsNum = this.allot.allot(n, this.THREADS);
+		this.rc = rc;
 
 		for (i = 0; i < n; i++) {
 			this.phases[i] = new Phase(i, rc);
 		}
-		
-		this.runs = new MultiThreads[this.THREADS];
-		for(i = 0; i < n; i++){
-			threadsNum[i%this.THREADS]++;
-		}
-		j = 0;
-		for(r = 0; r < this.THREADS; r++){
+		for(j = 0, r = 0; r < this.THREADS; r++){
 //			System.out.println(threadsNum[r]);
 			Phase[] phs = new Phase[threadsNum[r]];
 			for(i = 0; i < phs.length; i++){
@@ -111,10 +110,12 @@ public class PhasePro {
 		Snp[] snps = new Snp[snplist.size()];
 		snplist.toArray(snps);
 		
-		int i, j, n = this.phases.length, m = snps.length;
+		int i, j, r, n = this.phases.length, m = snps.length;
 		HaploType[][] hts = new HaploType[n][2];
 		int[][] alleles = new int[n][m];
 
+		// 找出这段的基因型的所有类型
+		// 因为大体是连锁不平衡快内的不同样本的基因型会有重复
 		for(i = 0; i < m; i++){
 			int[][] types = snps[i].getTypes();
 			for(j = 0; j < n; j++){
@@ -125,11 +126,14 @@ public class PhasePro {
 		for(i = 0; i < n; i++){
 			genotypes[i] = new GenoType(alleles[i], i);
 		}
-		Arrays.sort(genotypes);
+		Arrays.sort(genotypes);  // 相同的基因型会相进排列
 		boolean[] needCal = new boolean[n];
-		int news = 1;
+		int[] refs = new int[n];  // 第i个样本参考 standalone[refs[i]]
+		int news = 0;
 		needCal[0] = true;
+		refs[genotypes[0].getSample()] = genotypes[0].getSample();
 		for(i = 1; i < n; i++){
+			refs[genotypes[i].getSample()] = news;  // 第i个样本参考 standalone[refs[i]]
 			if(genotypes[i].equals(genotypes[i-1])){
 				needCal[i] = false;
 			}else{
@@ -137,19 +141,29 @@ public class PhasePro {
 				news++;
 			}
 		}
+//		System.out.println(news);
+		
 		Phase[] standalone = new Phase[news];
 		for(i = 0, j = 0; i < n; i++){
 			if(needCal[i]){
+//				System.out.println(j);
 				standalone[j++] = new Phase(i, rc); 
 			}
 		}
-		System.out.println(news);
 		
-		
-		for(i = 0; i < n; i++){
-			this.phases[i].setRun(snps, new CountDownLatch(1));
+		// 对这些“独特”的基因型分相
+		int[] multis = this.allot.allot(news, this.THREADS);
+		for(i = 0; i < news; i++){
+			standalone[i].setRun(snps, new CountDownLatch(1));
 		}
-		
+		for(r = 0, j = 0; r < this.THREADS; r++){
+			Phase[] phs = new Phase[multis[r]];
+			for(i = 0; i < multis[r]; i++){
+				phs[i] = standalone[j+i];
+			}
+			j += multis[r];
+			this.runs[i] = new MultiThreads<Phase>(phs);
+		}
 		CountDownLatch latch = new CountDownLatch(this.THREADS);
 		Thread[] threads = new Thread[this.THREADS];
 		for(i = 0; i < this.THREADS; i++){
@@ -162,6 +176,53 @@ public class PhasePro {
 			threads[i].start();
 		}
 		latch.await();
+		
+		// 剩下的找到有相同的基因型的样品的分相情况 并接上头
+		for(i = news = 0; i < n; i++){
+			if(this.phases[i].hasCleared()){
+				needCal[i] = false; // 没有头 直接加尾
+				this.phases[i].setHt(snps, null, standalone[refs[i]].getHts());
+			}else{
+				needCal[i] = true;
+				news++;
+			}
+		}
+		System.out.println(news);
+		Phase[] boundPhase = new Phase[news];
+		multis = this.allot.allot(news, this.THREADS);
+		for(i = 0, j = 0; i < n; i++){
+			if(needCal[i]){
+				Snp[] bound = this.phases[i].getBound(snps); // 能确定怎么接的SNP区域
+				boundPhase[j] = new Phase(i, rc);
+				boundPhase[j++].setRun(bound, new CountDownLatch(1));
+			}
+		}
+		for(r = 0, j = 0; r < this.THREADS; r++){
+			Phase[] phs = new Phase[multis[r]];
+			for(i = 0; i < multis[r]; i++){
+				phs[i] = boundPhase[j+i];
+			}
+			j += multis[r];
+			this.runs[i] = new MultiThreads<Phase>(phs);
+		}
+		latch = new CountDownLatch(this.THREADS);
+		threads = new Thread[this.THREADS];
+		for(i = 0; i < this.THREADS; i++){
+			this.runs[i].setRun(latch);
+		}
+		for(i = 0; i < this.THREADS; i++){
+			threads[i] = new Thread(this.runs[i]);
+		}
+		for(i = 0; i < this.THREADS; i++){
+			threads[i].start();
+		}
+		latch.await();
+		// 加尾
+		for(i = j = 0; i < n; i++){
+			if(needCal[i]){
+				this.phases[i].setHt(snps, boundPhase[j++].getHts(), standalone[refs[i]].getHts());
+			}
+		}
 		
 		for(i = 0; i < n; i++){
 			hts[i] = this.phases[i].getHts();
