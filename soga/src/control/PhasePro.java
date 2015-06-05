@@ -2,9 +2,11 @@ package control;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 
 import calculate.Phase;
+import dna.GenoType;
 import dna.HaploType;
 import dna.PhasedRange;
 import dna.Snp;
@@ -21,9 +23,11 @@ public class PhasePro {
 	private MultiThreads<Phase>[] runs;
 	private ArrayList<Snp> snplist;
 	
+	private Setting rc;
 	private Summary summary;
 
 	public PhasePro(Setting rc, Summary summary) throws FileNotFoundException {
+		this.rc = rc;
 		this.writer = new PhasedFp(rc);
 		this.summary = summary;
 		this.summary.add(this.writer);
@@ -96,19 +100,51 @@ public class PhasePro {
 
 	private boolean needCal() {
 		return (this.snplist.get(this.snplist.size() - 1).getPosition()
-				- this.snplist.get(0).getPosition() > window);
+				- this.snplist.get(0).getPosition() >= window);
 	}
-
+	
 	private PhasedRange run() throws InterruptedException, FileNotFoundException {
 		if(this.snplist.size() == 0){
 			return null;
 		}
-		System.out.println(this.snplist.size());
+//		System.out.println(this.snplist.size());
 		Snp[] snps = new Snp[snplist.size()];
 		snplist.toArray(snps);
 		
-		int i, n = this.phases.length;
+		int i, j, n = this.phases.length, m = snps.length;
 		HaploType[][] hts = new HaploType[n][2];
+		int[][] alleles = new int[n][m];
+
+		for(i = 0; i < m; i++){
+			int[][] types = snps[i].getTypes();
+			for(j = 0; j < n; j++){
+				alleles[j][i] = types[j][0]+types[j][1];
+			}
+		}
+		GenoType[] genotypes = new GenoType[n];
+		for(i = 0; i < n; i++){
+			genotypes[i] = new GenoType(alleles[i], i);
+		}
+		Arrays.sort(genotypes);
+		boolean[] needCal = new boolean[n];
+		int news = 1;
+		needCal[0] = true;
+		for(i = 1; i < n; i++){
+			if(genotypes[i].equals(genotypes[i-1])){
+				needCal[i] = false;
+			}else{
+				needCal[i] = true;
+				news++;
+			}
+		}
+		Phase[] standalone = new Phase[news];
+		for(i = 0, j = 0; i < n; i++){
+			if(needCal[i]){
+				standalone[j++] = new Phase(i, rc); 
+			}
+		}
+		System.out.println(news);
+		
 		
 		for(i = 0; i < n; i++){
 			this.phases[i].setRun(snps, new CountDownLatch(1));
@@ -134,7 +170,6 @@ public class PhasePro {
 		PhasedRange range = new PhasedRange(snps, hts);
 		this.writer.write(range);
 		return range;
-
 	}
-
+	
 }

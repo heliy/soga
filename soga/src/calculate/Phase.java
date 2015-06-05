@@ -80,7 +80,7 @@ public class Phase implements Runnable {
 			this.snps[i+j] = snps[j];
 		}
 
-		System.out.println(this.sample+", "+this.snps.length);
+//		System.out.println(this.sample+", "+this.snps.length);
 		// 基因型
 		for (i = 0; i < L; i++) {
 			types = this.snps[i].getTypes();
