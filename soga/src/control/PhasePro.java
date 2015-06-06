@@ -131,14 +131,14 @@ public class PhasePro {
 		int[] refs = new int[n];  // 第i个样本参考 standalone[refs[i]]
 		int news = 0;
 		needCal[0] = true;
-		refs[genotypes[0].getSample()] = genotypes[0].getSample();
+		refs[genotypes[0].getSample()] = news++;
 		for(i = 1; i < n; i++){
-			refs[genotypes[i].getSample()] = news;  // 第i个样本参考 standalone[refs[i]]
 			if(genotypes[i].equals(genotypes[i-1])){
+				refs[genotypes[i].getSample()] = refs[genotypes[i-1].getSample()];  // 第i个样本参考 standalone[refs[i]]
 				needCal[i] = false;
 			}else{
+				refs[genotypes[i].getSample()] = news++;
 				needCal[i] = true;
-				news++;
 			}
 		}
 //		System.out.println(news);
@@ -162,7 +162,7 @@ public class PhasePro {
 				phs[i] = standalone[j+i];
 			}
 			j += multis[r];
-			this.runs[i] = new MultiThreads<Phase>(phs);
+			this.runs[r] = new MultiThreads<Phase>(phs);
 		}
 		CountDownLatch latch = new CountDownLatch(this.THREADS);
 		Thread[] threads = new Thread[this.THREADS];
@@ -187,40 +187,41 @@ public class PhasePro {
 				news++;
 			}
 		}
-		System.out.println(news);
-		Phase[] boundPhase = new Phase[news];
-		multis = this.allot.allot(news, this.THREADS);
-		for(i = 0, j = 0; i < n; i++){
-			if(needCal[i]){
-				Snp[] bound = this.phases[i].getBound(snps); // 能确定怎么接的SNP区域
-				boundPhase[j] = new Phase(i, rc);
-				boundPhase[j++].setRun(bound, new CountDownLatch(1));
+		if(news > 0){
+			Phase[] boundPhase = new Phase[news];
+			multis = this.allot.allot(news, this.THREADS);
+			for(i = 0, j = 0; i < n; i++){
+				if(needCal[i]){
+					Snp[] bound = this.phases[i].getBound(snps); // 能确定怎么接的SNP区域
+					boundPhase[j] = new Phase(i, rc);
+					boundPhase[j++].setRun(bound, new CountDownLatch(1));
+				}
 			}
-		}
-		for(r = 0, j = 0; r < this.THREADS; r++){
-			Phase[] phs = new Phase[multis[r]];
-			for(i = 0; i < multis[r]; i++){
-				phs[i] = boundPhase[j+i];
+			for(r = 0, j = 0; r < this.THREADS; r++){
+				Phase[] phs = new Phase[multis[r]];
+				for(i = 0; i < multis[r]; i++){
+					phs[i] = boundPhase[j+i];
+				}
+				j += multis[r];
+				this.runs[r] = new MultiThreads<Phase>(phs);
 			}
-			j += multis[r];
-			this.runs[i] = new MultiThreads<Phase>(phs);
-		}
-		latch = new CountDownLatch(this.THREADS);
-		threads = new Thread[this.THREADS];
-		for(i = 0; i < this.THREADS; i++){
-			this.runs[i].setRun(latch);
-		}
-		for(i = 0; i < this.THREADS; i++){
-			threads[i] = new Thread(this.runs[i]);
-		}
-		for(i = 0; i < this.THREADS; i++){
-			threads[i].start();
-		}
-		latch.await();
-		// 加尾
-		for(i = j = 0; i < n; i++){
-			if(needCal[i]){
-				this.phases[i].setHt(snps, boundPhase[j++].getHts(), standalone[refs[i]].getHts());
+			latch = new CountDownLatch(this.THREADS);
+			threads = new Thread[this.THREADS];
+			for(i = 0; i < this.THREADS; i++){
+				this.runs[i].setRun(latch);
+			}
+			for(i = 0; i < this.THREADS; i++){
+				threads[i] = new Thread(this.runs[i]);
+			}
+			for(i = 0; i < this.THREADS; i++){
+				threads[i].start();
+			}
+			latch.await();
+			// 加尾
+			for(i = j = 0; i < n; i++){
+				if(needCal[i]){
+					this.phases[i].setHt(snps, boundPhase[j++].getHts(), standalone[refs[i]].getHts());
+				}
 			}
 		}
 		

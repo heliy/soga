@@ -79,6 +79,16 @@ public class Phase implements Runnable {
 		}		
 	}
 	
+	public void setH(int[][] H){
+		// TODO
+		this.H = H;
+	}
+	
+	public HaploType[] phase(Snp[] snps2, int[][] h){
+		this.H = h;
+		return this.phase(snps2);
+	}
+	
 	public HaploType[] phase(Snp[] snps2){
 
 		HaploType[] hts = new HaploType[2];
@@ -562,7 +572,7 @@ public class Phase implements Runnable {
 	
 	public void setHt(Snp[] snps, HaploType[] bound, HaploType[] haploTypes) {
 		this.addSnps(snps);
-		
+		this.hts = new HaploType[2];
 		if(bound == null){
 			this.setEnd(haploTypes[0].getAlleles(), haploTypes[1].getAlleles());
 			this.hts[0] = new HaploType(haploTypes[0].getAlleles(), this.sample);
