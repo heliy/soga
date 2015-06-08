@@ -52,15 +52,23 @@ public class Phase implements Runnable {
 		this.H = null;
 	}
 	
-	public Phase(int sample, Setting rc) {
+	public Phase(int sample, int[][] H, Setting rc){
+		this.construct(sample, rc);
+		this.H = H;
+	}
+	
+	private void construct(int sample, Setting rc) {
 		B = rc.getB();
 		T = (int) Math.pow(2, B);
 		N = rc.getSAMPLES();
 		K = rc.getK();
 		
 		this.sample = sample;		
-//		this.maxDistance = rc.getPhaseWINDOW()*2;
 		this.clearHistory();
+	}
+
+	public Phase(int sample, Setting rc) {
+		this.construct(sample, rc);
 	}
 	
 	public boolean hasCleared(){
@@ -149,44 +157,45 @@ public class Phase implements Runnable {
 			mafs[i] = this.snps[i].getMaf();
 		}
 
-		int[] pows, hetes;
-		pows = new int[N]; 
-		hetes = new int[N];
-		
-		sum = 0;
-		for (i = 0; i < N; i++) {
-			hetes[i] = 0;
-			for (j = 0; j < L; j++) {
-				hetes[i] += (genotypes[i][j] == 1) ? (1) : (0);
+		if(H == null){
+			int[] pows, hetes;
+			pows = new int[N]; 
+			hetes = new int[N];
+			
+			sum = 0;
+			for (i = 0; i < N; i++) {
+				hetes[i] = 0;
+				for (j = 0; j < L; j++) {
+					hetes[i] += (genotypes[i][j] == 1) ? (1) : (0);
+				}
+				// System.out.println(i+": "+hetes[i]);
+				pows[i] = ((int) Math.pow(2, hetes[i])) % K;
+				sum += pows[i];
 			}
-			// System.out.println(i+": "+hetes[i]);
-			pows[i] = ((int) Math.pow(2, hetes[i])) % K;
-			sum += pows[i];
-		}
-		K = (sum < K) ? (sum) : (K);
-
-		H = new int[K][L];
-
-		Random r = new Random();
-		hNum = 0;
-		for (i = 0; i < N; i++) {
-			selectp = Math.max(1.0 / K, K / (N * pows[i]));
-			for (j = 0; j < pows[i]; j++) {
-				if (hNum == K) {
-					break;
+	
+			H = new int[K][L];
+	
+			Random r = new Random();
+			hNum = 0;
+			for (i = 0; i < N; i++) {
+				selectp = Math.max(1.0 / K, K / (N * pows[i]));
+				for (j = 0; j < pows[i]; j++) {
+					if (hNum == K) {
+						break;
+					}
+					if (r.nextDouble() > selectp) {
+						continue;
+					}
+					getCandidate(i, hNum);
+					hNum++;
 				}
-				if (r.nextDouble() > selectp) {
-					continue;
-				}
+			}
+			while (hNum < K) {
+				i = r.nextInt(N);
 				getCandidate(i, hNum);
 				hNum++;
-			}
+			}	
 		}
-		while (hNum < K) {
-			i = r.nextInt(N);
-			getCandidate(i, hNum);
-			hNum++;
-		}		
 
 		if(bits == null){
 			bits = new int[T][B];

@@ -84,7 +84,7 @@ public class HaploPro {
 			}
 			if(st >= 0.8*this.MAXSIZE){
 				this.MAXSIZE *= 2;
-				System.out.println(this.MAXSIZE);
+//				System.out.println(this.MAXSIZE);
 				return;
 			}
 			int n = blocks.length;
@@ -114,7 +114,7 @@ public class HaploPro {
 
 	private void useBlock(Block b) throws FileNotFoundException, InterruptedException {
 		writer.writeline(">> " + blockNo + "\n");
-		System.out.println("("+this.MAXSIZE+") "+blockNo+": "+b.getUp()+", "+b.getDown());
+//		System.out.println("("+this.MAXSIZE+") "+blockNo+": "+b.getUp()+", "+b.getDown());
 		if (phased != null) {
 			phased.writeline(">> " + blockNo + "\n");
 			b.phase(rc, phased);
