@@ -60,6 +60,7 @@ public class Setting {
 	private String output = null;
 	private String phasedFile = null;
 	private double htminratio = 0.05;
+	private String geneFile = null;
 	
 	// 处理
 	private boolean FULL = false;
@@ -75,6 +76,7 @@ public class Setting {
 	private boolean TAG = false;
 	private boolean CC = false;
 	
+	private boolean MAP = false;
 	
 	// 运行
 	private boolean ignoreGenotypeException = false;
@@ -118,6 +120,15 @@ public class Setting {
 					throw new ArgsException("No Input Sample Info File.");
 				}
 				parseStatus();
+			}else if(arg.equals("-geneposition")){
+				i++;
+				if(i == l){
+					throw new ArgsException("No Input Snp File.");					
+				}
+				geneFile = args[i];
+				if((i == args.length) || snpFile.charAt(0) == '-'){
+					throw new ArgsException("No Gene Position File.");
+				}
 			}else if(arg.equals("-filesplit")){
 				i++;
 				if(i == l){
@@ -243,6 +254,8 @@ public class Setting {
 				CC = true;
 			}else if(arg.equals("--tag")){
 				TAG = true;
+			}else if(arg.equals("--map")){
+				MAP = true;
 			}else if(arg.equals("--ignoregenotypeexception")){
 				ignoreGenotypeException = true;
 			}else if(arg.equals("--silence")){
@@ -256,6 +269,12 @@ public class Setting {
 		}
 		if(sampleFile == null && CC){
 			throw new ArgsException("If you want to take case/control test, you MUST have sample info file!");
+		}
+		if(!CC && MAP){
+			throw new ArgsException("If you want to Map SNP and Haplotype block to gene(s), you MUST take case/control test!");						
+		}
+		if(MAP && this.geneFile == null){
+			throw new ArgsException("If you want to Map SNP and Haplotype block to gene(s), you MUST have Gene position file!");			
 		}
 		if(output == null){
 			output = snpFile;
@@ -330,6 +349,9 @@ public class Setting {
 		}
 		if(RECOM){
 			System.out.print("recombination hotspots, ");
+		}
+		if(MAP){
+			System.out.print("map gene, ");
 		}
 		System.out.println();
 		if(!CHECK && !FILTER && !BADDATA && !LD && !BLOCK && !TAG && !FULL && !RECOM){
@@ -725,6 +747,22 @@ public class Setting {
 		}else{
 			return false;
 		}
+	}
+
+	public String getGeneFile() {
+		return geneFile;
+	}
+
+	public void setGeneFile(String geneFile) {
+		this.geneFile = geneFile;
+	}
+
+	public boolean isMAP() {
+		return MAP;
+	}
+
+	public void setMAP(boolean mAP) {
+		MAP = mAP;
 	}
 
 }

@@ -109,7 +109,7 @@ public class HaploPro {
 				this.MAXSIZE = SIZE;
 			}
 		}		
-		System.out.println(this.MAXSIZE);
+//		System.out.println(this.MAXSIZE);
 	}
 
 	private void useBlock(Block b) throws FileNotFoundException, InterruptedException {
