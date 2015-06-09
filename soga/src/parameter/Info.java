@@ -7,14 +7,14 @@ public class Info {
 	private static String[][] qcparameters;
 	private static String[][] proparameters;
 	private static String[][] inputrequire;
-	private static String version;
-	private static String[] authors;
-	private static String license;
+//	private static String version;
+//	private static String[] authors;
+//	private static String license;
 	private static String[] alsosee;
-	private static String[] todos;
+//	private static String[] todos;
 	
 	public Info(){
-		name = "**SOGA** - SOftware of Genome-wide Analysis for caculating LD and identifying haplptype block";
+		name = "**SOGA** - SOftware of Genome-wide Analysis for SNP Haplotype";
 		
 		discription = "A toolkit to caculate Linkage Disequilibrium and find haplotype block in SNP data.";
 		
@@ -42,7 +42,7 @@ public class Info {
 		qcparameters[4][0] = "**-minHt**";
 		qcparameters[4][1] = "lower bound of ratio of haplotype when write haplotypes in __OUTPUT__.BLOCK file, **default 0.05**.";
    
-		proparameters = new String[15][2];
+		proparameters = new String[16][2];
 		proparameters[0][0] = "**-threads**";
 		proparameters[0][1] = "the number of threads that SOGA uses, **defualt 2**.";
 		proparameters[1][0] = "**--full**";
@@ -63,18 +63,20 @@ public class Info {
 		proparameters[7][1] = "SNPs which PASS QC, output as __OUTPUT__.FILTER.";
 		proparameters[8][0] = "**--baddata**";
 		proparameters[8][1] = "SNPs which NOT PASS QC, output as __OUTPUT__.BADDATA.";
-		proparameters[9][0] = "**--ld**";
-		proparameters[9][1] = "to do LD caculation between two SNPs which distance is less than DISTANCE, output as __OUTPUT__.LD.";
-		proparameters[10][0] = "**-ld-distance**";
-		proparameters[10][1] = "MAX distance in calculate LDs in adjacent SNPs, **DEFAULT 1000**(bp).";
-		proparameters[11][0] = "**-ht-window**";
-		proparameters[11][1] = "the size of snps in one window while recongnizing haplotype blocks, **DEFAULT 1000.**";
-		proparameters[12][0] = "**-phase-window**";
-		proparameters[12][1] = "the size of snps in one windo while phasing, **DEFAULT 2,000,000.**";
-		proparameters[13][0] = "**--silence**";
-		proparameters[13][1] = "running without asking confirmation";
-		proparameters[14][0] = "**--help**";
-		proparameters[14][1] = "print THIS help.";
+		proparameters[9][0] = "**--full**";
+		proparameters[9][1] = "Phasing full SNP.";		
+		proparameters[10][0] = "**--ld**";
+		proparameters[10][1] = "to do LD caculation between two SNPs which distance is less than DISTANCE, output as __OUTPUT__.LD.";
+		proparameters[11][0] = "**-ld-distance**";
+		proparameters[11][1] = "MAX distance in calculate LDs in adjacent SNPs, **DEFAULT 1000**(bp).";
+		proparameters[12][0] = "**-ht-window**";
+		proparameters[12][1] = "the size of snps in one window while recongnizing haplotype blocks, **DEFAULT 1000.**";
+		proparameters[13][0] = "**-phase-window**";
+		proparameters[13][1] = "the size of snps in one windo while phasing, **DEFAULT 2,000,000.**";
+		proparameters[14][0] = "**--silence**";
+		proparameters[14][1] = "running without asking confirmation";
+		proparameters[15][0] = "**--help**";
+		proparameters[15][1] = "print THIS help.";
 		
 		inputrequire = new String[2][2];
 		inputrequire[0][0] = "**SNP DATA**";
@@ -87,12 +89,12 @@ public class Info {
 				+ "represents status in samples order by genotypes in SNP data. NO more contents."
 				+ "Number of digits MUST as SAME as genotypes.";
 		
-		version = "0.8.0";
-		
-		authors = new String[1];
-		authors[0] = "Heliy<heliy7#163.com>";
-		
-		license = "GPLv3";
+//		version = "0.8.0";
+//		
+//		authors = new String[1];
+//		authors[0] = "Heliy<heliy7#163.com>";
+//		
+//		license = "GPLv3";
 		
 		alsosee = new String[5];
 		alsosee[0] = "The algorithm of LD caculation is same as [Haploview](http://www.ncbi.nlm.nih.gov/pubmed/15297300).";
@@ -102,40 +104,40 @@ public class Info {
 		alsosee[4] = "This is the work of Heliy's undergraduate graduation project, [article, chinese]().";
 		
 		
-		todos = new String[5];
-		todos[0] = "Find Recombination Hotspots.";
-		todos[1] = "Caculation iHS.(for Positive Selection)";
-		todos[2] = "Input Genetic Map to caculate recombination rates between SNPs.";
-		todos[3] = "Process in X/Y Chromosome and Family Dataset.";
-		todos[4] = "Input File from PLINK format.";
+//		todos = new String[5];
+//		todos[0] = "Find Recombination Hotspots.";
+//		todos[1] = "Caculation iHS.(for Positive Selection)";
+//		todos[2] = "Input Genetic Map to caculate recombination rates between SNPs.";
+//		todos[3] = "Process in X/Y Chromosome and Family Dataset.";
+//		todos[4] = "Input File from PLINK format.";
 	}
 	
 	public String toString(){
 		StringBuffer sb = new StringBuffer();
-		sb.append("**NAME**\n\t");
-		sb.append(name+"\n");
-		sb.append("**DISCRIPTION**\n\t");
-		sb.append(discription+"\n");
+		sb.append("NAME\n");
+		sb.append("  "+name+"\n");
+		sb.append("DISCRIPTION\n");
+		sb.append("  "+discription+"\n");
 
-		sb.append("\n**PARAMETERS\n\t**CACULATION**\n");
+		sb.append("PARAMETERS\n");
 		sb.append(paras(proparameters));
-		sb.append("\t**Input/Output**\n");
 		sb.append(paras(ioparameters));
-		sb.append("\t**Quality Control**\n");
 		sb.append(paras(qcparameters));
 		
-		sb.append("\n**INPUT REQUIREMENT**\n");
-		sb.append(paras(inputrequire));
-		
-		sb.append("\n**VERSION**\t"+version+"\n");
-		sb.append("\n**LICENSE**\t"+license+"\n");
-		sb.append("\n**AUTHORS**\n");
-		sb.append(list(authors));
-		
-		sb.append("\n**ALSO SEE**\n");
-		sb.append(list(alsosee));
-		sb.append("\n**TODO**\n");
-		sb.append(list(todos));
+		sb.append("\nMore information, see: https://www.bioapp.org/soga\n");
+//		
+//		sb.append("\n**INPUT REQUIREMENT**\n");
+//		sb.append(paras(inputrequire));
+//		
+//		sb.append("\n**VERSION**\t"+version+"\n");
+//		sb.append("\n**LICENSE**\t"+license+"\n");
+//		sb.append("\n**AUTHORS**\n");
+//		sb.append(list(authors));
+//		
+//		sb.append("\n**ALSO SEE**\n");
+//		sb.append(list(alsosee));
+//		sb.append("\n**TODO**\n");
+//		sb.append(list(todos));
 		return sb.toString();
 	}
 
@@ -145,9 +147,9 @@ public class Info {
 		int i, n;
 		n = parameters.length;
 		for(i = 0; i < n; i++){
-			sb.append("\n\t\t");
+			sb.append("\n    ");
 			sb.append(parameters[i][0]);
-			sb.append(",\t");
+			sb.append(",  ");
 			sb.append(parameters[i][1]);
 			sb.append("\n");
 		}
@@ -159,7 +161,7 @@ public class Info {
 		StringBuffer sb = new StringBuffer();
 		
 		for(i = 0; i < n; i++){
-			sb.append("\n\t"+(i+1)+". ");
+			sb.append("\n  "+(i+1)+". ");
 			sb.append(l[i]);
 			sb.append("\n");
 		}

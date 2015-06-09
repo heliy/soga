@@ -1,300 +1,60 @@
-# NAME
+NAME
+  **SOGA** - SOftware of Genome-wide Analysis for SNP Haplotype
+  
+DISCRIPTION
 
-**SOGA** - SOftware of Genome-wide Analysis for caculating LD
- and identifying haplptype block
-	
-# DISCRIPTION
+  A toolkit to caculate Linkage Disequilibrium and find haplotype block in SNP data.
+  
+PARAMETERS
 
-A toolkit to caculate Linkage Disequilibrium and find haplotype
- block in SNP data.
+    **-threads**,  the number of threads that SOGA uses, **defualt 2**.
 
-------------------------
+    **--full**,  to phase all SNPs.
 
-# PARAMETERS
+    **--block**,  to find Haplotype Blocks, output as __OUTPUT__.BLOCK
 
-**CACULATION**
-	
-**-threads**,	the number of threads that SOGA uses,
- **defualt 2**.
-		
-**--block**,	to find Haplotype Blocks, output as
- __OUTPUT__.BLOCK
+    **--phase**,  to phase samples in blocks, output as __OUTPUT__.PHASED, MUST also have `--block`.
 
-**--phase**,	to phase samples in blocks, output as
- __OUTPUT__.PHASED, MUST also have `--block`.
+    **--cc**,  to do case-control test(include OR and  chi-square) in 1)SNP, in __OUTPUT__.CHECK, and, 2)haplotypes,  in __OUTPUT__.BLOCK; if you have `--block` and `--phase` in parameters, SOGA will do 1) and 2), otherwise, it just do 1).
 
-**--cc**,	to do case-control test(include OR and 
- chi-square) in 1)SNP, in __OUTPUT__.CHECK, and, 2)haplotypes,  
- in __OUTPUT__.BLOCK; if you have `--block` and `--phase` in
- parameters, SOGA will do 1) and 2), otherwise, it just do 1).
+    **--tag**,  to find tag SNP in blocks, output in __OUTPUT__.BLOCK, MUST also have `--block`
 
-**--tag**,	to find tag SNP in blocks, output in
- __OUTPUT__.BLOCK, MUST also have `--block`
+    **--check**,  QC results of SNPs, output as __OUTPUT__.CHECK.
 
-**--check**,	QC results of SNPs, output as __OUTPUT__.CHECK.
+    **--filter**,  SNPs which PASS QC, output as __OUTPUT__.FILTER.
 
-**--filter**,	SNPs which PASS QC, output as __OUTPUT__.FILTER.
+    **--baddata**,  SNPs which NOT PASS QC, output as __OUTPUT__.BADDATA.
 
-**--baddata**,	SNPs which NOT PASS QC, output as
- __OUTPUT__.BADDATA.
+    **--full**,  Phasing full SNP.
 
-**--ld**,	to do LD caculation between two SNPs which
- distance is less than DISTANCE, output as __OUTPUT__.LD.
+    **--ld**,  to do LD caculation between two SNPs which distance is less than DISTANCE, output as __OUTPUT__.LD.
 
-**-ld-distance**,	MAX distance in calculate LDs in
- adjacent SNPs, **DEFAULT 1000**(bp).
+    **-ld-distance**,  MAX distance in calculate LDs in adjacent SNPs, **DEFAULT 1000**(bp).
 
-**-window**,	the size of snps in one window, **DEFAULT 1000.**
+    **-ht-window**,  the size of snps in one window while recongnizing haplotype blocks, **DEFAULT 1000.**
 
-**--help**,	print THIS help.
+    **-phase-window**,  the size of snps in one windo while phasing, **DEFAULT 2,000,000.**
 
-**Input/Output**
+    **--silence**,  running without asking confirmation
 
-**-snpfile**,	specifies the file of SNP data, see input
- reqirements.
+    **--help**,  print THIS help.
 
-**-sampleinfo**,	specifies the file of sample infomation,
- see input requirements.
+    **-snpfile**,  specifies the file of SNP data, see input reqirements.
 
-**-filesplit**,	use delimiter instead of **defualt TAB** for
- process SNP file.
+    **-sampleinfo**,  specifies the file of sample infomation, see input requirements.
 
-**-output**,	specifies the files where to write the results.
+    **-filesplit**,  use delimiter instead of **defualt TAB** for process SNP file.
 
-**Quality Control**
+    **-output**,  specifies the files where to write the results.
 
-**-nnratio**,	upper bound of ratio of nn genotype in one SNP,
- **default 0.05**.
+    **-nnratio**,  upper bound of ratio of nn genotype in one SNP, **default 0.05**.
 
-**-maf**,	lower bound of MAF(Minor Allele Frequency),
- **default 0.01.**
+    **-maf**,  lower bound of MAF(Minor Allele Frequency), **default 0.01.**
 
-**-hwe**,	lower bound of HWE(Hardy–Weinberg equilibrium),
- **default 0.001.**
+    **-hwe**,  lower bound of HWE(Hardy–Weinberg equilibrium), **default 0.001.**
 
-**-minHt**,	lower bound of ratio of haplotype when write
- haplotypes in __OUTPUT__.BLOCK file, **default 0.05**.
+    **--ignoreGenotypeException**,  the SNP which have invalid genotype will be discarded silently.
 
-**--ignoreGenotypeException**,	the SNP which have invalid
- genotype will be discarded silently.
+    **-minHt**,  lower bound of ratio of haplotype when write haplotypes in __OUTPUT__.BLOCK file, **default 0.05**.
 
----------------------------
-
-# INPUT REQUIREMENT
-
-**SNP DATA**,	One line is a SNP, eg. 
- `rs3013006 C/G chr21 16054667 CG GC GC GG GC CC GC CC CC ...`   is 
- `#rs allele1/allele2 chromosome position genotype1 genotype2 genotyp3 ...`.
- You can have many different chromosomes, but MUST in one continuous
- segment, NOT have many segments in many places.
-
-**Sample INFO**,	Info file must have
- `0`(normal)/`1`(case)/`-1`(unknown)s, represents status
-  in samples order by genotypes in SNP data. NO more
-  contents.Number of digits MUST as SAME as genotypes.
-
----------------------------
-
-# VERSION
-0.8.0
-
-# LICENSE
-GPLv3
-
-# AUTHORS
-
-1. Heliy(heliy7#163.com)
-
-------------------------------
-	
-# ALSO SEE
-
-1. The algorithm of LD caculation is same as [Haploview]
-(http://www.ncbi.nlm.nih.gov/pubmed/15297300).
-
-2. The algorithm of haplotype block finding is [Taliun et al, 2014]
-(http://www.ncbi.nlm.nih.gov/pubmed/24423111).
-
-3. The algorithm of phase is [SHAPEIT2]
-(http://www.ncbi.nlm.nih.gov/pubmed/22138821/).
-
-4. The algorithm of tag SNP is [Yan et al, 2015]
-(http://www.ncbi.nlm.nih.gov/pubmed/25879733/).
-
-5. This is the work of Heliy's undergraduate graduation project,
- [article, chinese]().
-
-# TODO
-
-0. Complete Documents.
-
-1. Find Recombination Hotspots.
-
-2. Caculate iHS.(for Positive Selection)
-
-3. Input Genetic Map to caculate recombination rates between SNPs.
-
-42. So Long, and Thanks for All the Algorithms. ：）
-
-------------------
-
-# example
-
-```Shell
-$ git clone https://github.com/heliy/soga.git
-$ cd soga
-$ java -jar soga.jar -snpfile example/lit -sampleinfo \
-> example/lit.info -filesplit " " --check --filter --cc
-SNP data file: example/lit
-Sample Info file: example/lit.info
-OUTPUT: example/lit
-cases: 14
-controls: 272
-unknowns: 0
-
-caculate? [Y/N]:y
-==============================================
-Output: example/lit.CHECK
-Output: example/lit.FILTER
-New Chromesome: chr21
-New Chromesome: chr22
-Close: example/lit.CHECK
-Close: example/lit.FILTER
-==============================================
-BEGIN: Mon Apr 20 17:21:09 CST 2015
-END: Mon Apr 20 17:21:09 CST 2015
-Snp Files: example/lit
-Sample Info File: example/lit.info
-OUTPUT File:
-example/lit.CHECK
-example/lit.FILTER
-Samples:
-	Total: 286
-	Cases: 14
-	Controls: 272
-	Unknowns: 0
-SNPS: 	Count 	passQC
-total: 	2000	1919
-chr21: 	18	11
-chr22: 	1982	1908
-```
-
----------------------------------------------
-
-```Shell
-$ java -jar soga.jar -snpfile example/lit.FILTER -sampleinfo \ 
-> example/lit.info -filesplit " " -output example/lit_no_phase \
-> --block -threads 4
-SNP data file: example/lit.FILTER
-Sample Info file: example/lit.info
-OUTPUT: example/lit_no_phase
-cases: 14
-controls: 272
-unknowns: 0
-find block, 
-caculate? [Y/N]:y
-==============================================
-Output: example/lit_no_phase.BLOCK
-New Chromesome: chr21
-Find new Haplotype blocks: 2
-New Chromesome: chr22
-Find new Haplotype blocks: 354
-Close: example/lit_no_phase.BLOCK
-==============================================
-BEGIN: Mon Apr 20 17:32:51 CST 2015
-END: Mon Apr 20 17:33:04 CST 2015
-Snp Files: example/lit.FILTER
-Sample Info File: example/lit.info
-OUTPUT File:
-example/lit_no_phase.BLOCK
-Samples:
-	Total: 286
-	Cases: 14
-	Controls: 272
-	Unknowns: 0
-SNPS: 	Count 	passQC
-total: 	1919	1919
-chr21: 	11	11
-chr22: 	1908	1908
-BLOCKS: 	Count	
-total: 	356
-chr21: 	2
-chr22: 	354
-```
-
-----------------------------
-
-```Shell
-$java -jar soga.jar -snpfile example/lit.FILTER -sampleinfo\
-> example/lit.info -filesplit " " -output\
-> example/lit_with_phase -threads 4 --block --cc --tag --phase
-SNP data file: example/lit.FILTER
-Sample Info file: example/lit.info
-OUTPUT: example/lit.FILTER
-cases: 14
-controls: 272
-unknowns: 0
-excepted distribution: 0.04895104895104895, 0.951048951048951
-find block, phase, case-control test, tag, 
-caculate? [Y/N]:y
-==============================================
-Output: example/lit_with_phase.BLOCK
-Output: example/lit_with_phase.PHASED
-New Chromesome: chr21
-Find new Haplotype blocks: 2
-New Chromesome: chr22
-Find new Haplotype blocks: 354
-Close: example/lit_with_phase.BLOCK
-Close: example/lit_with_phase.PHASED
-==============================================
-BEGIN: Mon Apr 20 17:46:14 CST 2015
-END: Mon Apr 20 18:02:33 CST 2015
-Snp Files: example/lit.FILTER
-Sample Info File: example/lit.info
-OUTPUT File:
-example/lit_with_phase.PHASED
-example/lit_with_phase.BLOCK
-Samples:
-	Total: 286
-	Cases: 14
-	Controls: 272
-	Unknowns: 0
-SNPS: 	Count 	passQC
-total: 	1919	1919
-chr21: 	11	11
-chr22: 	1908	1908
-BLOCKS: 	Count	
-total: 	356
-chr21: 	2
-chr22: 	354
-```
-
------------------------------------
-
-
------------------------------------
-
-There are results in example/lit_with_phase.BLOCK:
-
->> Block_ID(1)
-chrome(chr21)	begin_position(16053791)	end_position(16054740)	number_of_snps(3)	rs_ID_1st(rs11703994)	rs_ID_2nd(rs3013006)	rs_ID_3rd(rs55926024)
-Haplotype_ID(1)	cc-pvalue(0.5152257845253427)	cases/controls(13/210)	ratio_in_samples(0.38986013986013984)	allele_1st(C)	allele_2nd(C)	allele_3rd(G)	OR(1.0396039603960396)	OR_CI_Low(0.432615722096604)	OR_CI_High(50.464377629442176)
-......
-......
-......
-----	----	----	number_of_tags(3)	1st_is_tag(YES)	2nd_is_tag(YES)	3rd_is_tag(YES)
-
------------------------------------
-
-# Python scripts
-
-1. deletealready.py
-If running have been interrupted, you can use this 
-to delete the snp datas already caculated.
-```
-$ python2 deletealready.py breast_cancer_snps \
-> rs55926024 "\t" > breast_cancer_snps_1504201830
-```
-the snps before rs55926024 will not in breast_cancer_snps_1504201830
-
-2. blockprase.py
+More information, see: https://www.bioapp.org/soga

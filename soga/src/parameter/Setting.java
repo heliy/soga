@@ -14,7 +14,7 @@ public class Setting {
 
 	// 文件数据
 	private int HEAD = 4;
-	private int SAMPLES;
+	private int SAMPLES = 0;
 //	private int[] valids;
 	
 	private String fileSplit = "\t";
@@ -254,8 +254,8 @@ public class Setting {
 				CC = true;
 			}else if(arg.equals("--tag")){
 				TAG = true;
-			}else if(arg.equals("--map")){
-				MAP = true;
+//			}else if(arg.equals("--map")){
+//				MAP = true;
 			}else if(arg.equals("--ignoregenotypeexception")){
 				ignoreGenotypeException = true;
 			}else if(arg.equals("--silence")){
@@ -270,12 +270,12 @@ public class Setting {
 		if(sampleFile == null && CC){
 			throw new ArgsException("If you want to take case/control test, you MUST have sample info file!");
 		}
-		if(!CC && MAP){
-			throw new ArgsException("If you want to Map SNP and Haplotype block to gene(s), you MUST take case/control test!");						
-		}
-		if(MAP && this.geneFile == null){
-			throw new ArgsException("If you want to Map SNP and Haplotype block to gene(s), you MUST have Gene position file!");			
-		}
+//		if(!CC && MAP){
+//			throw new ArgsException("If you want to Map SNP and Haplotype block to gene(s), you MUST take case/control test!");						
+//		}
+//		if(MAP && this.geneFile == null){
+//			throw new ArgsException("If you want to Map SNP and Haplotype block to gene(s), you MUST have Gene position file!");			
+//		}
 		if(output == null){
 			output = snpFile;
 		}

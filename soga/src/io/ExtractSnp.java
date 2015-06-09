@@ -40,8 +40,14 @@ public class ExtractSnp {
 		f = new File(this.inputFile);
 		in = new Scanner(f);
 		head = rc.getHEAD();
-		samples = rc.getSAMPLES();
         ignoreGenotypeException = rc.isIgnoreGenotypeException();
+        if(rc.getSAMPLES() == 0){
+        	String s = in.nextLine();
+        	rc.setSAMPLES(s.split(this.splitFlag).length - this.head);
+        	in.close();
+        	in = new Scanner(f);
+        }
+		samples = rc.getSAMPLES();
 	}
 
 	public Snp nextSnp() throws FileNotFoundException, AlleleException, GenoTypeException, SnpContainsException{
