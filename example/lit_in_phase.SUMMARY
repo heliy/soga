@@ -1,9 +1,10 @@
-BEGIN: Tue Jun 09 16:06:20 CST 2015
-END: Tue Jun 09 16:06:28 CST 2015
+BEGIN: Tue Jun 09 16:06:58 CST 2015
+END: Tue Jun 09 16:21:19 CST 2015
 Snp Files: example/lit
 Sample Info File: example/lit.info
 OUTPUT File:
-example/lit_no_phase.BLOCK
+example/lit_in_phase.PHASED
+example/lit_in_phase.BLOCK
 Samples:
 	Total: 286
 	Cases: 15

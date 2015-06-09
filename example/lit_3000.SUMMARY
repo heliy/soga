@@ -1,9 +1,9 @@
-BEGIN: Tue Jun 09 16:06:20 CST 2015
-END: Tue Jun 09 16:06:28 CST 2015
+BEGIN: Tue Jun 09 16:04:11 CST 2015
+END: Tue Jun 09 16:04:13 CST 2015
 Snp Files: example/lit
 Sample Info File: example/lit.info
 OUTPUT File:
-example/lit_no_phase.BLOCK
+example/lit_3000.LD
 Samples:
 	Total: 286
 	Cases: 15
@@ -13,7 +13,3 @@ SNPS: 	Count 	passQC
 total: 	2000	1919
 chr21: 	18	11
 chr22: 	1982	1908
-BLOCKS: 	Count	
-total: 	195
-chr21: 	2
-chr22: 	193
