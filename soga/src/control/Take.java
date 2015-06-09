@@ -4,8 +4,8 @@ import java.io.FileNotFoundException;
 
 import dna.Snp;
 import exceptions.AlleleException;
-import exceptions.ChromosomeSegmentException;
 import exceptions.GenoTypeException;
+import exceptions.OrderException;
 import exceptions.SnpContainsException;
 import parameter.Setting;
 import parameter.Summary;
@@ -35,6 +35,7 @@ public class Take {
 	private BadFp bad = null;
 	
 	private String chr;
+	private Snp mae = null;
 	private boolean renew;
 	
 	private Summary summary;
@@ -86,18 +87,28 @@ public class Take {
 		this.take(isPhased, rc2, summary2);		
 	}
 	
-	public Summary run() throws FileNotFoundException, AlleleException, GenoTypeException, SnpContainsException, ChromosomeSegmentException, InterruptedException{
+	public Summary run() throws FileNotFoundException, AlleleException, GenoTypeException, SnpContainsException, OrderException, InterruptedException{
 		String line;
    		Snp snp = input.nextSnp();
 		while(snp != null){
 //			System.out.print(chr+", "+snp.getChr());
-			if(snp.getChr().equals(chr)){
-				summary.add(snp, chr, true);				
-			}else{
-				renew = true;
-				summary.add(snp, snp.getChr(), false);
+			try{
+				if(snp.getChr().equals(chr)){
+					summary.add(snp, chr, true);				
+				}else{
+					renew = true;
+					summary.add(snp, snp.getChr(), false);
+				}
+				if(this.mae != null){
+					if(!renew && this.mae.getPosition() >= snp.getPosition()){
+						throw new OrderException();
+					}
+				}
+			}catch (OrderException e){
+				throw new OrderException(this.mae, snp);
 			}
-//			System.out.println(renew);
+			this.mae = snp;
+//			System.out.println(renew);h
 			chr = snp.getChr();
 			line = input.getThisline() + "\n";
 			if(check != null){

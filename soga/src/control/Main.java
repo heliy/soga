@@ -5,8 +5,8 @@ import java.io.PrintWriter;
 
 import exceptions.AlleleException;
 import exceptions.ArgsException;
-import exceptions.ChromosomeSegmentException;
 import exceptions.GenoTypeException;
+import exceptions.OrderException;
 import exceptions.SampleStatusException;
 import exceptions.SnpContainsException;
 import parameter.Setting;
@@ -14,7 +14,7 @@ import parameter.Summary;
 
 public class Main {
 
-	public static void main(String[] args) throws FileNotFoundException, ArgsException, SampleStatusException, AlleleException, GenoTypeException, SnpContainsException, ChromosomeSegmentException, InterruptedException {
+	public static void main(String[] args) throws FileNotFoundException, ArgsException, SampleStatusException, AlleleException, GenoTypeException, SnpContainsException, OrderException, InterruptedException {
 		Setting rc = new Setting();
 		if(rc.parseArgs(args)){
 			System.out.println("==============================================");
