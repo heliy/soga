@@ -84,15 +84,27 @@ public class Block implements Comparable<Block> {
 		ArrayList<HaploType> htlist = new ArrayList<HaploType>();
 		HaploType mae;
 		mae = new HaploType(hts[0].getAlleles(), 0);
-		mae.add(status[mae.getSampleNo()]);
+		if(status != null){
+			mae.add(status[mae.getSampleNo()]);
+		}else{
+			mae.addUnknown();
+		}
 		for(i = 1; i < n; i++){
 //			System.out.println(hts[i]);
 			if(hts[i].equals(mae)){
-				mae.add(status[hts[i].getSampleNo()]);
+				if(status != null){
+					mae.add(status[mae.getSampleNo()]);
+				}else{
+					mae.addUnknown();
+				}
 			}else{
 				htlist.add(mae.clone());
 				mae = new HaploType(hts[i].getAlleles(), hts[i].getSampleNo());
-				mae.add(status[mae.getSampleNo()]);
+				if(status != null){
+					mae.add(status[mae.getSampleNo()]);
+				}else{
+					mae.addUnknown();
+				}
 			}
 		}
 	    htlist.add(mae);

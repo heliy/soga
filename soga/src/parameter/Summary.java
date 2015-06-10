@@ -10,7 +10,7 @@ import io.FileOutput;
 import dna.Block;
 import dna.LD;
 import dna.Snp;
-import exceptions.ChromosomeSegmentException;
+import exceptions.OrderException;
 
 public class Summary {
 	private Date begin;
@@ -61,7 +61,7 @@ public class Summary {
 		outputs[outnum++] = output.getFileName();
 	}
 
-	public void add(Snp snp, String chr, boolean chrIsIn) throws ChromosomeSegmentException {
+	public void add(Snp snp, String chr, boolean chrIsIn) throws OrderException {
 		Long[] nums;
 		snps++;
 		if(!snp.isBad()){
@@ -76,7 +76,7 @@ public class Summary {
 			snpPerChr.put(chr, nums);
 		}else{
 			if(snpPerChr.containsKey(chr)){
-				throw new ChromosomeSegmentException(chr);
+				throw new OrderException();
 			}
 			nums = new Long[2];
 			nums[0]= (long) 1;

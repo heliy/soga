@@ -42,7 +42,7 @@ public class Snp {
 	private boolean isBad; // is bad snp
 	
 	private boolean isPhased;
-
+	
 	public Snp(boolean isPhased, String rsNo, int a, int b, String Chr, String sposition,
 			String[] parts, Setting rc) throws GenoTypeException {
 		this.isPhased = isPhased;
@@ -171,6 +171,10 @@ public class Snp {
 		return chr;
 	}
 	
+	public int[] getGenos(){
+		return this.genos;
+	}
+
 	public boolean hasLD(Snp another){
 		if(pws.containsKey(another)){
 			return true;

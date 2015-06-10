@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 //import java.util.concurrent.CountDownLatch;
 
+import java.util.concurrent.CountDownLatch;
+
 import dna.Block;
 import dna.LD;
 import dna.Scope;
@@ -26,7 +28,8 @@ public class FindBlock implements Runnable {
 	private Block[] blocks = null;
 	private boolean isBlock;
 	
-//	private CountDownLatch latch;
+	
+	private CountDownLatch latch;
 	
 	public FindBlock(Setting rc, boolean isblock){
 		
@@ -211,13 +214,14 @@ public class FindBlock implements Runnable {
 		return win;
 	}
 	
-	public void setRun(Snp[] snpS, int begin, int end, boolean islast){
+	public void setRun(Snp[] snpS, int begin, int end, boolean islast, CountDownLatch latch){
 		snps = new Snp[end-begin];
 		int i;
 		for(i = begin; i < end; i++){
 			snps[i-begin] = snpS[i];
 		}
 		isLast = islast;
+		this.latch = latch;
 	}
 
 	@Override
@@ -227,7 +231,7 @@ public class FindBlock implements Runnable {
 //		}else{
 //			blocks = mig(snps, isLast);
 //		}
-//		latch.countDown();
+		latch.countDown();
 	}
 
 	public Block[] getBlocks(){

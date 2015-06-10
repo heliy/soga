@@ -88,13 +88,7 @@ public class Phase implements Runnable {
 	}
 	
 	public void setH(int[][] H){
-		// TODO
 		this.H = H;
-	}
-	
-	public HaploType[] phase(Snp[] snps2, int[][] h){
-		this.H = h;
-		return this.phase(snps2);
 	}
 	
 	public HaploType[] phase(Snp[] snps2){
@@ -111,7 +105,7 @@ public class Phase implements Runnable {
 		for (i = 0; i < L; i++) {
 			types = this.snps[i].getTypes();
 			for(j = 0; j < N; j++){
-    			genotypes[j][i] = types[sample][0]+types[sample][1];
+    			genotypes[j][i] = types[j][0]+types[j][1];
 			}
 			ishete[i] = (genotypes[sample][i] == 1);
 			hete += (ishete[i]?1:0);

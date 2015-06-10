@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 
+import com.sun.org.apache.bcel.internal.generic.Select;
+
 import calculate.Phase;
 import dna.GenoType;
 import dna.HaploType;
@@ -15,6 +17,7 @@ import parameter.Setting;
 import parameter.Summary;
 import util.AllotThreads;
 import util.MultiThreads;
+import util.SelectH;
 
 public class PhasePro {
 	private int THREADS;
@@ -142,12 +145,12 @@ public class PhasePro {
 			}
 		}
 //		System.out.println(news);
-		
+		SelectH select = new SelectH(rc, snps);
 		Phase[] standalone = new Phase[news];
 		for(i = 0, j = 0; i < n; i++){
 			if(needCal[i]){
 //				System.out.println(j);
-				standalone[j++] = new Phase(i, rc); 
+				standalone[j++] = new Phase(i, select.getH(), rc); 
 			}
 		}
 		

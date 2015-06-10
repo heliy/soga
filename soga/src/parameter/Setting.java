@@ -20,6 +20,7 @@ public class Setting {
 	private String fileSplit = "\t";
 
 	// QC
+	private double sampleRatio = 0.20;
 	private double NNRatio = 0.05;
 	private double MAF = 0.01;
 	private double HWE = 0.001;
@@ -63,9 +64,12 @@ public class Setting {
 	private String geneFile = null;
 	
 	// 处理
+	
 	private boolean FULL = false;
 	
-	private boolean CHECK = false;
+	private boolean CHECK = true;	
+	private boolean SAMPLEQC = true;
+	private boolean SNPQC = false;
 	private boolean FILTER = false;
 	private boolean BADDATA = false;
 
@@ -119,16 +123,15 @@ public class Setting {
 				if((i == args.length) || sampleFile.charAt(0) == '-'){
 					throw new ArgsException("No Input Sample Info File.");
 				}
-				parseStatus();
-			}else if(arg.equals("-geneposition")){
-				i++;
-				if(i == l){
-					throw new ArgsException("No Input Snp File.");					
-				}
-				geneFile = args[i];
-				if((i == args.length) || snpFile.charAt(0) == '-'){
-					throw new ArgsException("No Gene Position File.");
-				}
+//			}else if(arg.equals("-geneposition")){
+//				i++;
+//				if(i == l){
+//					throw new ArgsException("No Input Snp File.");					
+//				}
+//				geneFile = args[i];
+//				if((i == args.length) || snpFile.charAt(0) == '-'){
+//					throw new ArgsException("No Gene Position File.");
+//				}
 			}else if(arg.equals("-filesplit")){
 				i++;
 				if(i == l){
@@ -147,7 +150,16 @@ public class Setting {
 				if((i == args.length) || output.charAt(0) == '-'){
 					throw new ArgsException("No Output File Name.");
 				}
-			}else if(arg.equals("-nnratio")){
+			}else if(arg.equals("-sample-nn")){
+				i++;
+				if((i == args.length) || args[i].charAt(0) == '-'){
+					throw new ArgsException("No Limit Ratio of NN.");
+				}
+				this.sampleRatio = Double.parseDouble(args[i]);
+				if(this.sampleRatio < 0 || this.sampleRatio > 1){
+					throw new ArgsException("Unvalid Ratio of NN.");					
+				}
+			}else if(arg.equals("-snp-nn")){
 				i++;
 				if((i == args.length) || args[i].charAt(0) == '-'){
 					throw new ArgsException("No Limit Ratio of NN.");
@@ -174,15 +186,6 @@ public class Setting {
 				if(HWE < 0 || HWE > 1){
 					throw new ArgsException("Unvalid Ratio of Hardy–Weinberg equilibrium.");					
 				}
-//			}else if(arg.equals("-maxn")){
-//				i++;
-//				if((i == args.length) || args[i].charAt(0) == '-'){
-//					throw new ArgsException("No Limit Ratio of N in one Snp.");
-//				}
-//				MAXN = Double.parseDouble(args[i]);
-//				if(MAXN < 0 || MAXN > 1){
-//					throw new ArgsException("Unvalid Limit Ratio of N in one Snp.");					
-//				}
 			}else if(arg.equals("-minht")){
 				i++;
 				if((i == args.length) || args[i].charAt(0) == '-'){
@@ -228,8 +231,8 @@ public class Setting {
 				if(threads < 0){
 					throw new ArgsException("Unvalid Number of Threads.");					
 				}
-			}else if(arg.equals("--check")){
-				CHECK = true;
+			}else if(arg.equals("--cancel-check")){
+				CHECK = false;
 			}else if(arg.equals("--ld")){
 				LD = true;
 			}else if(arg.equals("--filter")){
@@ -287,6 +290,13 @@ public class Setting {
 				throw new ArgsException("If you try to PHASE, you have to process BLOCK!");
 			}
 		}
+        if(SAMPLES == 0){
+        	Scanner in = new Scanner(new File(this.snpFile));
+        	String s = in.nextLine();
+        	this.setSAMPLES(s.split(this.fileSplit).length - this.HEAD);
+        	in.close();
+        	this.unknowns = this.SAMPLES;
+        }
 		return display(false);
 	}
 	
@@ -763,6 +773,14 @@ public class Setting {
 
 	public void setMAP(boolean mAP) {
 		MAP = mAP;
+	}
+
+	public double getSampleRatio() {
+		return sampleRatio;
+	}
+
+	public void setSampleRatio(double sampleRatio) {
+		this.sampleRatio = sampleRatio;
 	}
 
 }
