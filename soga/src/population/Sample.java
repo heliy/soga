@@ -19,6 +19,11 @@ public class Sample {
 		this.no = no;
 		this.name = name;
 	}
+	
+	public String toString(){
+		String pass = (this.pass)?("YES"):("NO");
+		return this.name+"\t"+this.statu+"\t"+this.ratio+"\t"+pass+"\n";
+	}
 
 	public int getNo() {
 		return no;

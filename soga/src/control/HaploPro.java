@@ -112,10 +112,10 @@ public class HaploPro {
 	}
 
 	private void useBlock(Block b) throws FileNotFoundException, InterruptedException {
-		writer.writeline(">> " + blockNo + "\n");
+		writer.writeline("# BLOCK " + blockNo + "\n");
 //		System.out.println("("+this.MAXSIZE+") "+blockNo+": "+b.getUp()+", "+b.getDown());
 		if (phased != null) {
-			phased.writeline(">> BLOCK " + blockNo + "\n");
+			phased.writeline("# BLOCK " + blockNo + "\n");
 			b.phase(rc, phased);
 		}
 		blockNo++;

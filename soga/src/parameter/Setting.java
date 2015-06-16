@@ -1,12 +1,14 @@
 package parameter;
 
+import io.ExtractSample;
+
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Scanner;
 
+import population.Sample;
 import exceptions.ArgsException;
+import exceptions.SampleException;
 import exceptions.SampleStatusException;
 
 public class Setting {
@@ -15,7 +17,8 @@ public class Setting {
 	// 文件数据
 	private int HEAD = 4;
 	private int SAMPLES = 0;
-//	private int[] valids;
+	private Sample[] samples;
+	private boolean[] sampleMask = null;
 	
 	private String fileSplit = "\t";
 
@@ -24,7 +27,6 @@ public class Setting {
 	private double NNRatio = 0.05;
 	private double MAF = 0.01;
 	private double HWE = 0.001;
-	private double MAXN = 0.8;
 
 	//LD
 	private int DISTANCE = 25000;
@@ -86,15 +88,17 @@ public class Setting {
 	private boolean ignoreGenotypeException = false;
 	private boolean silence = false;
 
-	public boolean parseArgs(String[] args) throws ArgsException, FileNotFoundException, SampleStatusException{
+	public boolean parseArgs(String[] args) throws ArgsException, FileNotFoundException, SampleStatusException, SampleException{
 		int i, l = args.length;
 		if(l < 2){
-			return display(true);
+			display(true);
+			return false;
 		}
 		for(i = 0; i < l; i++){
 			String arg = args[i].toLowerCase();
 			if(arg.equals("--help") || arg.equals("-h")){
-				return display(true);
+				display(true);
+				return false;
 			}else if(arg.equals("-snpfile")){
 				i++;
 				if(i == l){
@@ -113,7 +117,6 @@ public class Setting {
 				if((i == args.length) || phasedFile.charAt(0) == '-'){
 					throw new ArgsException("No Input Phased SNP File.");
 				}
-				parseStatus();
 			}else if(arg.equals("-sampleinfo")){
 				i++;
 				if(i == l){
@@ -233,6 +236,10 @@ public class Setting {
 				}
 			}else if(arg.equals("--cancel-check")){
 				CHECK = false;
+			}else if(arg.equals("--cancel-sample-qc")){
+				SAMPLEQC = false;
+			}else if(arg.equals("--snp-qc")){
+				SNPQC = true;
 			}else if(arg.equals("--ld")){
 				LD = true;
 			}else if(arg.equals("--filter")){
@@ -246,7 +253,7 @@ public class Setting {
 				PHASE = true;
 				CC = true;
 				TAG = true;
-				CHECK = true;
+				SNPQC = true;
 			}else if(arg.equals("--block")){
 				BLOCK = true;
 //			}else if(arg.equals("--recom")){
@@ -271,64 +278,66 @@ public class Setting {
 			throw new ArgsException("MUST have snp input file!");
 		}
 		if(sampleFile == null && CC){
-			throw new ArgsException("If you want to take case/control test, you MUST have sample info file!");
 		}
-//		if(!CC && MAP){
-//			throw new ArgsException("If you want to Map SNP and Haplotype block to gene(s), you MUST take case/control test!");						
-//		}
-//		if(MAP && this.geneFile == null){
-//			throw new ArgsException("If you want to Map SNP and Haplotype block to gene(s), you MUST have Gene position file!");			
-//		}
-		if(output == null){
-			output = snpFile;
+		
+		ExtractSample extract = new ExtractSample();
+		if(this.sampleFile == null){
+			if(CC){
+				throw new ArgsException("If you want to take case/control test, you MUST have sample info file!");				
+			}
+			this.sampleFile = snpFile;
+        	Scanner in = new Scanner(new File(this.snpFile));
+        	String s = in.nextLine();
+        	this.setSAMPLES(s.split(this.fileSplit).length - this.HEAD);
+        	in.close();
+        	this.unknowns = this.SAMPLES;
+			this.setSamples(extract.getSample(this.SAMPLES));
+			this.passAllSample();
+		}else{
+			this.setSamples(extract.getSample(this.sampleFile));
+			this.passAllSample();
+			this.SAMPLES = this.samples.length;
+		}
+		if(this.output == null){
+			if(this.snpFile != null){
+				this.output = this.snpFile;				
+			}else{
+				this.output = this.phasedFile;
+			}
 		}
 		if(this.FULL && this.BLOCK){
 			this.PHASE = true;
+		}
+		if(CC && this.freqs == null){
+			if(cases+controls != 0){
+				freqs = new double[2];
+				freqs[0] = (double)(cases)/(cases+controls);
+				freqs[1] = (double)(controls)/(cases+controls);
+			}else{
+				throw new SampleStatusException();
+			}
 		}
 		if(!BLOCK){
 			if(PHASE){
 				throw new ArgsException("If you try to PHASE, you have to process BLOCK!");
 			}
 		}
-        if(SAMPLES == 0){
-        	Scanner in = new Scanner(new File(this.snpFile));
-        	String s = in.nextLine();
-        	this.setSAMPLES(s.split(this.fileSplit).length - this.HEAD);
-        	in.close();
-        	this.unknowns = this.SAMPLES;
-        }
-		return display(false);
+		return true;
 	}
 	
 	private int parseWindow(String argument){
 		return Integer.parseInt(argument);
 	}
 	
-	@SuppressWarnings("resource")
-	private void parseStatus() throws FileNotFoundException, SampleStatusException{
-		Scanner in = new Scanner(new File(sampleFile));
-		ArrayList<Integer> ss = new ArrayList<Integer>();
-		int i = 1;
-		while(in.hasNext()){
-			int n = in.nextInt();
-			if(n < -1 || n > 1){
-				throw new SampleStatusException(i, n);
-			}
-			ss.add(n);
-			i++;
-		}
-		i--;
-		SAMPLES = i;
-		status = new int[i];
-		Iterator<Integer> iter = ss.iterator();
-		i = 0;
-		while(iter.hasNext()){
-			status[i++] = iter.next();
-		}
-		setStatus(status);
+	public boolean needCheck(){
+		return this.CHECK || this.SAMPLEQC;
 	}
-
-	private Boolean display(boolean needHelp){
+	
+	public boolean isPhased(){
+		return this.snpFile == null;
+	}
+	
+	public boolean display(boolean needHelp){
 		if(needHelp){
 			System.out.println(new Info());
 			return false;
@@ -336,6 +345,16 @@ public class Setting {
 		System.out.println("SNP data file: "+snpFile);
 		System.out.println("Sample Info file: "+sampleFile);
 		System.out.println("OUTPUT: "+output);
+		
+		System.out.println("We have "+this.SAMPLES+" samples (set defualt or passed QC):");
+		for(Sample sample: this.samples){
+			if(sample.isPass()){
+				System.out.print(sample.getName()+", ");
+			}
+		}
+		System.out.println();
+		
+		System.out.println("Status:");
 		System.out.println("cases: "+cases);
 		System.out.println("controls: "+controls);
 		System.out.println("unknowns: "+unknowns);
@@ -364,7 +383,10 @@ public class Setting {
 			System.out.print("map gene, ");
 		}
 		System.out.println();
-		if(!CHECK && !FILTER && !BADDATA && !LD && !BLOCK && !TAG && !FULL && !RECOM){
+		if(!this.hasSample()){
+			return false;
+		}
+		if(!SNPQC && !FILTER && !BADDATA && !LD && !BLOCK && !TAG && !FULL && !RECOM){
 			return false;
 		}
 		if(this.silence){
@@ -380,7 +402,20 @@ public class Setting {
 			return true;
 		}
 	}
-
+	
+	public boolean hasSample() {
+		for (boolean b : this.sampleMask) {
+			if (b) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public void cancelCC(){
+		this.CC = false;
+	}
+	
 	public void cancelBADDATA(){
 		this.BADDATA = false;
 	}
@@ -397,6 +432,22 @@ public class Setting {
 		this.CHECK = false;
 	}
 
+	public boolean doSAMPLEQC(){
+		return this.SAMPLEQC;
+	}
+	
+	public void setSAMPLEQC(){
+		this.SAMPLEQC = true;
+	}
+	
+	public boolean doSNPQC(){
+		return this.SNPQC;
+	}
+	
+	public void setSNPQC(){
+		this.SNPQC = true;
+	}
+	
 	public boolean doFULL() {
 		return FULL;
 	}
@@ -505,31 +556,6 @@ public class Setting {
 		HWE = hWE;
 	}
 
-	public double getMAXN() {
-		return MAXN;
-	}
-
-	public void setMAXN(double mAXN) {
-		MAXN = mAXN;
-	}
-
-/*	public int[] getValids() {
-		return valids;
-	}
-
-	public void setValids(int[] valids) {
-		this.valids = valids;
-	}
-	
-	 默认时全体均设为合格的SNP 
-	public void setValids(){
-		int i;
-		valids = new int[SAMPLES];
-		for(i = 0; i < SAMPLES; i++){
-			valids[i] = i;
-		}
-	}
-*/
 	public void setNNRatio(double nNRatio) {
 		NNRatio = nNRatio;
 	}
@@ -633,13 +659,6 @@ public class Setting {
 			}else{
 				unknowns++;
 			}
-		}
-		if(cases+controls != 0){
-			freqs = new double[2];
-			freqs[0] = (double)(cases)/(cases+controls);
-			freqs[1] = (double)(controls)/(cases+controls);
-		}else{
-			freqs = null;			
 		}
 	}
 
@@ -781,6 +800,46 @@ public class Setting {
 
 	public void setSampleRatio(double sampleRatio) {
 		this.sampleRatio = sampleRatio;
+	}
+
+	public Sample[] getSamples() {
+		return samples;
+	}
+	
+	private void parseSample(){
+		int i, j = 0;
+		this.sampleMask = new boolean[this.samples.length];
+		for(i = 0; i < this.samples.length; i++){
+			this.sampleMask[i] = this.samples[i].isPass();
+			if(this.sampleMask[i]){
+				j++;
+			}
+		}
+		this.SAMPLES = j;
+		this.status = new int[this.SAMPLES];
+		i = 0;
+		for(Sample s: this.samples){
+			if(s.isPass()){
+				this.status[i++] = s.getStatu();
+			}
+		}
+		this.setStatus(status);		
+	}
+
+	public void setSamples(Sample[] samples) {
+		this.samples = samples;
+		this.parseSample();
+	}
+
+	public boolean[] getSampleMask() {
+		return sampleMask;
+	}
+	
+	public void passAllSample(){
+		for(Sample s: this.samples){
+			s.setPass(true);
+		}
+		this.parseSample();
 	}
 
 }

@@ -10,5 +10,10 @@ public class SampleStatusException extends Exception {
 		System.out.println("Should be -1/0/1");
 		System.out.println("More help: `--help`");
 	}
+	
+	public SampleStatusException(){
+		System.out.println("You MUST have konwn status in your samples!");
+		System.out.println("More help: `--help`");
+	}
 
 }

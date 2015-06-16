@@ -22,6 +22,7 @@ public class ExtractSnp {
 	private String thisline;
 	private Setting rc;
 	private boolean ignoreGenotypeException;
+	private boolean[] mask = null;
 	
 	private boolean isPhased;
 	
@@ -37,17 +38,13 @@ public class ExtractSnp {
 		if(rc.needRescanPhasedFile() && isPhased){
 			this.splitFlag = "\t";
 		}
+//		System.out.println(isPhased+","+this.inputFile);
 		f = new File(this.inputFile);
 		in = new Scanner(f);
 		head = rc.getHEAD();
         ignoreGenotypeException = rc.isIgnoreGenotypeException();
-        if(rc.getSAMPLES() == 0){
-        	String s = in.nextLine();
-        	rc.setSAMPLES(s.split(this.splitFlag).length - this.head);
-        	in.close();
-        	in = new Scanner(f);
-        }
 		samples = rc.getSAMPLES();
+		mask = rc.getSampleMask();
 	}
 
 	public Snp nextSnp() throws FileNotFoundException, AlleleException, GenoTypeException, SnpContainsException{
@@ -57,12 +54,25 @@ public class ExtractSnp {
 				return this.nextSnp();
 			}else{
 				thisline = line;
-				String[] parts = line.split(splitFlag);
+				String[] parts_old = line.split(splitFlag);
 //				System.out.println(samples);
-				if(parts.length != (samples+head)){
-					throw new SnpContainsException(this.inputFile, thisline, samples+head);
+				String[] parts = new String[this.samples+this.head];
+				int i, j = 0;
+				if(this.mask != null){
+					if(parts_old.length != (this.mask.length+head)){
+						throw new SnpContainsException(this.inputFile, thisline, this.mask.length+head);
+					}
+					for(i = 0; i < this.head; i++){
+						parts[i] = parts_old[i];
+					}
+					for(i = j = this.head; i < this.mask.length+this.head; i++){
+						if(this.mask[i-this.head]){
+							parts[j++] = parts_old[i];
+						}
+					}
+				}else{
+					parts = parts_old;
 				}
-				int i;
 				String types[] = new String[samples];
 				for(i = 0; i < samples; i++){
 					types[i] = parts[i + head];

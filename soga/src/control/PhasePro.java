@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 
-import com.sun.org.apache.bcel.internal.generic.Select;
-
 import calculate.Phase;
 import dna.GenoType;
 import dna.HaploType;
@@ -17,7 +15,6 @@ import parameter.Setting;
 import parameter.Summary;
 import util.AllotThreads;
 import util.MultiThreads;
-import util.SelectH;
 
 public class PhasePro {
 	private int THREADS;
@@ -132,27 +129,34 @@ public class PhasePro {
 		Arrays.sort(genotypes);  // 相同的基因型会相进排列
 		boolean[] needCal = new boolean[n];
 		int[] refs = new int[n];  // 第i个样本参考 standalone[refs[i]]
-		int news = 0;
-		needCal[0] = true;
-		refs[genotypes[0].getSample()] = news++;
+		int news = 1;
+		needCal[genotypes[0].getSample()] = true;
 		for(i = 1; i < n; i++){
 			if(genotypes[i].equals(genotypes[i-1])){
-				refs[genotypes[i].getSample()] = refs[genotypes[i-1].getSample()];  // 第i个样本参考 standalone[refs[i]]
-				needCal[i] = false;
+				needCal[genotypes[i].getSample()] = false;
 			}else{
-				refs[genotypes[i].getSample()] = news++;
-				needCal[i] = true;
+				needCal[genotypes[i].getSample()] = true;
+				news++;
 			}
 		}
-//		System.out.println(news);
-		SelectH select = new SelectH(rc, snps);
+		
 		Phase[] standalone = new Phase[news];
 		for(i = 0, j = 0; i < n; i++){
 			if(needCal[i]){
-//				System.out.println(j);
-				standalone[j++] = new Phase(i, select.getH(), rc); 
+				refs[i] = j;
+				standalone[j++] = new Phase(i, rc); 
+//					System.out.println((j-1)+": "+i);
+			}else{
+				refs[i] = -1;
 			}
 		}
+		for(i = 0; i < n; i++){
+			j = genotypes[i].getSample();
+			if(refs[j] == -1){
+				refs[j] = refs[genotypes[i-1].getSample()];
+			}
+		}
+				
 		
 		// 对这些“独特”的基因型分相
 		int[] multis = this.allot.allot(news, this.THREADS);
@@ -184,6 +188,14 @@ public class PhasePro {
 		for(i = news = 0; i < n; i++){
 			if(this.phases[i].hasCleared()){
 				needCal[i] = false; // 没有头 直接加尾
+//				HaploType[] hs = standalone[refs[i]].getHts();
+//				int[] as1 = hs[0].getAlleles();
+//				int[] as2 = hs[1].getAlleles();
+//				int a;
+//				for(j = 0, a = as1.length; j < a; j++){
+//					System.out.println(as1[j]+" | " +as2[j]);
+//				}
+
 				this.phases[i].setHt(snps, null, standalone[refs[i]].getHts());
 			}else{
 				needCal[i] = true;
@@ -231,6 +243,7 @@ public class PhasePro {
 		for(i = 0; i < n; i++){
 			hts[i] = this.phases[i].getHts();
 		}
+
 		
 		PhasedRange range = new PhasedRange(snps, hts);
 		this.writer.write(range);

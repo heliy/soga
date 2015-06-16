@@ -57,6 +57,10 @@ public class Phase implements Runnable {
 		this.H = H;
 	}
 	
+	public int getSample(){
+		return this.sample;
+	}
+	
 	private void construct(int sample, Setting rc) {
 		B = rc.getB();
 		T = (int) Math.pow(2, B);
@@ -249,6 +253,12 @@ public class Phase implements Runnable {
 		double tmpturn[][] = new double[T][T]; // 临时转移矩阵
 
 		int[] genotype = genotypes[this.sample];
+		
+//		System.out.println(this.sample);
+//		for(int j = 0; j < L; j++){
+//		System.out.print(genotype[j]+", ");				
+//	}
+//	System.out.println();
 		int i, j, k, u, u1, u2;
 		int inNo, segNo, m, total, maxi, maei, maej;
 		double nextalpha, nextbeta, pmax, tmp, tmpsum;
@@ -385,6 +395,7 @@ public class Phase implements Runnable {
 			X1[0] = this.endType;
 			X2[0] = getCp(this.endType);
 		}
+//		System.out.println(X1[0]+", "+X2[0]);
 		// System.out.println(S[L-1]);
 		if (S[L - 1] > 0) {
 			while (true) {
@@ -434,7 +445,7 @@ public class Phase implements Runnable {
 						}
 					}
 					X1[S[m]] = maxi;
-					X2[S[m - 1]] = getCp(maxi);
+					X2[S[m]] = getCp(maxi);
 					if (S[m] == S[L - 1]) {
 						break;
 					}
@@ -462,6 +473,14 @@ public class Phase implements Runnable {
 		
 		this.setEnd(ht1, ht2);
 		
+//		for(j = 0; j < L-e; j++){
+//		System.out.print(ht1[j]+", ");				
+//	}
+//	System.out.println();
+//	for(j = 0; j < L-e; j++){
+//	System.out.print(ht2[j]+", ");				
+//}
+//System.out.println();
 		hts[0] = new HaploType(ht1, this.sample);
 		hts[1] = new HaploType(ht2, this.sample);
 
@@ -469,34 +488,6 @@ public class Phase implements Runnable {
 		
 	}
 	
-	private void setEnd(int[] ht1, int[] ht2){
-		int i, j, e = this.endSnps.length;
-	    int[] hetes = new int[B];
-	    this.endType = 0;
-	    for(i = L-1, j = 0; i >= e && j < B; i--){
-	    	if(ht1[i-e] != ht2[i-e]){
-	    		hetes[j] = i;
-	    		if(this.snps[i].getA() == ht1[i-e]){
-    	    		this.endType += (int)Math.pow(2, j);
-	    		}
-	    		j++;
-	    	}
-	    }
-	    if(i < e){
-	    	i = e;
-	    }
-		endSnps = new Snp[L-i];
-		
-//		for(i = 0, a = ht1.length; i < a; i++){
-//			System.out.println(ht1[i]+" | " +ht2[i]);
-//		}
-//		System.out.println();
-		
-		for(j = i; i < L; i++){
-//			System.out.println(e+": "+i);
-			endSnps[i-j] = this.snps[i];
-		}		
-	}
 
 	private int getCp(int i) {
 		return T - i - 1;
@@ -572,14 +563,48 @@ public class Phase implements Runnable {
 		}
 		return bound;
 	}
-	
+
+	private void setEnd(int[] ht1, int[] ht2){
+		int i, j, e = this.endSnps.length;
+		int[] hetes = new int[B];
+	    this.endType = 0;
+	    for(i = L-1, j = 0; i >= e && j < B; i--){
+	    	if(ht1[i-e] != ht2[i-e]){
+	    		hetes[j] = i;
+	    		if(this.snps[i].getA() == ht1[i-e]){
+    	    		this.endType += (int)Math.pow(2, j);
+	    		}
+	    		j++;
+	    	}
+	    }
+	    if(i < e){
+	    	i = e;
+	    }
+		endSnps = new Snp[L-i];
+		for(j = i; i < L; i++){
+			endSnps[i-j] = this.snps[i];
+		}		
+//		int a;
+//		for(j = 0, a = ht1.length; j < a; j++){
+//			System.out.println(ht1[j]+" | " +ht2[j]);
+//		}
+//		System.out.println();
+	}
+
 	public void setHt(Snp[] snps, HaploType[] bound, HaploType[] haploTypes) {
 		this.addSnps(snps);
 		this.hts = new HaploType[2];
 		if(bound == null){
 			this.setEnd(haploTypes[0].getAlleles(), haploTypes[1].getAlleles());
+
 			this.hts[0] = new HaploType(haploTypes[0].getAlleles(), this.sample);
 			this.hts[1] = new HaploType(haploTypes[1].getAlleles(), this.sample);
+//			int[] as1 = hts[0].getAlleles();
+//			int[] as2 = hts[1].getAlleles();
+//			for(int j = 0, a = as1.length; j < a; j++){
+//				System.out.println(as1[j]+" | " +as2[j]);
+//			}
+//			System.out.println();
 			return;
 		}else{
 			int[] ht1alleles = bound[0].getAlleles();

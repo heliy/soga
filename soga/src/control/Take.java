@@ -10,9 +10,9 @@ import exceptions.SnpContainsException;
 import parameter.Setting;
 import parameter.Summary;
 import io.BadFp;
-import io.CheckFp;
 import io.ExtractSnp;
 import io.FilterFp;
+import io.SNPFp;
 
 
 //  总的相关处理的类
@@ -30,7 +30,7 @@ public class Take {
 	private HaploPro block = null;
 	private HaploPro recom = null;
 
-	private CheckFp check = null;
+	private SNPFp snpFp = null;
 	private FilterFp filter = null;
 	private BadFp bad = null;
 	
@@ -46,9 +46,9 @@ public class Take {
 		this.summary = summary;
 		this.rc = rc;
 		this.input = new ExtractSnp(this.rc, this.isPhased);
-		if(rc.doCHECK()){
-			this.check = new CheckFp(this.rc);
-			this.summary.add(this.check);
+		if(rc.doSNPQC()){
+			this.snpFp = new SNPFp(this.rc);
+			this.summary.add(this.snpFp);
 		}
     	if(rc.doFILTER()){
     		this.filter = new FilterFp(this.rc);
@@ -111,8 +111,8 @@ public class Take {
 //			System.out.println(renew);h
 			chr = snp.getChr();
 			line = input.getThisline() + "\n";
-			if(check != null){
-				check.write(snp);
+			if(this.snpFp != null){
+				this.snpFp.write(snp);
 			}
 			if(bad != null && snp.isBad()){
 				bad.write(line);
@@ -159,8 +159,8 @@ public class Take {
 		if(full != null){
 			full.close(true);
 		}
-		if(check != null){
-			check.close();
+		if(snpFp != null){
+			snpFp.close();
 		}
 		if(filter != null){
 			filter.close();

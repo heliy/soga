@@ -56,5 +56,13 @@ public class GenoType implements Comparable<GenoType>{
 	public void setSample(int sample) {
 		this.sample = sample;
 	}
-
+	
+	public String toString(){
+		StringBuffer sb = new StringBuffer();
+		sb.append(this.sample+":");
+		for(int allel: this.alleles){
+			sb.append(" "+allel+", ");
+		}
+		return sb.toString();
+	}
 }

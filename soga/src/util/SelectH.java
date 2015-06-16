@@ -43,6 +43,13 @@ public class SelectH {
     			genotypes[j][i] = types[j][0]+types[j][1];
 			}
 		}
+//		for(i = 0;i < N; i++){
+//			for(j = 0; j < L; j++){
+//    			System.out.print(genotypes[i][j]+", ");				
+//			}
+//			System.out.println();
+//		}
+//		System.out.println();
 		int[] pows, hetes;
 		pows = new int[N]; 
 		hetes = new int[N];
