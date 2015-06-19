@@ -1,13 +1,10 @@
 NAME
   **SOGA** - SOftware of Genome-wide Analysis for SNP Haplotype
-  
 DISCRIPTION
-
   A toolkit to caculate Linkage Disequilibrium and find haplotype block in SNP data.
-  
 PARAMETERS
 
-    **-threads**,  the number of threads that SOGA uses, **defualt 2**.
+    **-threads**,  the number of threads that SOGA uses in PHASE, **defualt 2**.
 
     **--full**,  to phase all SNPs.
 
@@ -19,19 +16,19 @@ PARAMETERS
 
     **--tag**,  to find tag SNP in blocks, output in __OUTPUT__.BLOCK, MUST also have `--block`
 
-    **--check**,  QC results of SNPs, output as __OUTPUT__.CHECK.
+    **--GWHAS**,  do GWAS and GHWA
+
+    **--snp-qc**,  QC results of SNPs, output as __OUTPUT__.SNPQC.
 
     **--filter**,  SNPs which PASS QC, output as __OUTPUT__.FILTER.
 
     **--baddata**,  SNPs which NOT PASS QC, output as __OUTPUT__.BADDATA.
 
-    **--full**,  Phasing full SNP.
-
     **--ld**,  to do LD caculation between two SNPs which distance is less than DISTANCE, output as __OUTPUT__.LD.
 
     **-ld-distance**,  MAX distance in calculate LDs in adjacent SNPs, **DEFAULT 1000**(bp).
 
-    **-ht-window**,  the size of snps in one window while recongnizing haplotype blocks, **DEFAULT 1000.**
+    **-ht-window**,  the size of snps in one window while recongnizing haplotype blocks, **DEFAULT 200.**
 
     **-phase-window**,  the size of snps in one windo while phasing, **DEFAULT 2,000,000.**
 
@@ -39,15 +36,19 @@ PARAMETERS
 
     **--help**,  print THIS help.
 
-    **-snpfile**,  specifies the file of SNP data, see input reqirements.
+    **-snpfile**,  specifies the file of SNP data
 
-    **-sampleinfo**,  specifies the file of sample infomation, see input requirements.
+    **-phasedfile,  specifies the PHASED file of SNP data
+
+    **-sampleinfo**,  specifies the file of sample infomation
 
     **-filesplit**,  use delimiter instead of **defualt TAB** for process SNP file.
 
     **-output**,  specifies the files where to write the results.
 
-    **-nnratio**,  upper bound of ratio of nn genotype in one SNP, **default 0.05**.
+    **-sample-nn**,  upper bound of ratio of nn genotype in one SAMPLE, **default 0.20**.
+
+    **-snp-nn**,  upper bound of ratio of nn genotype in one SNP, **default 0.05**.
 
     **-maf**,  lower bound of MAF(Minor Allele Frequency), **default 0.01.**
 
@@ -57,4 +58,9 @@ PARAMETERS
 
     **-minHt**,  lower bound of ratio of haplotype when write haplotypes in __OUTPUT__.BLOCK file, **default 0.05**.
 
+    **--cancel-check**,  do NOT check order in dataset.
+
+    **--cancel-sample-qc**,  do NOT take quality control on samples
+
 More information, see: https://www.bioapp.org/soga
+

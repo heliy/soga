@@ -36,7 +36,7 @@ public class Setting {
 	private double EHRCU = 0.9;
 	
 	// Block
-	private int HTWINDOW = 4000;
+	private int HTWINDOW = 200;
 	private int RHWINDOW = 200;
 //	private int MAXSIZE = 2000;
 //	private int WIN = -1;
@@ -105,7 +105,7 @@ public class Setting {
 					throw new ArgsException("No Input Snp File.");					
 				}
 				snpFile = args[i];
-				if((i == args.length) || snpFile.charAt(0) == '-'){
+				if(snpFile.charAt(0) == '-'){
 					throw new ArgsException("No Input Snp File.");
 				}
 			}else if(arg.equals("-phasedfile")){
@@ -114,7 +114,7 @@ public class Setting {
 					throw new ArgsException("No Input Sample Info File.");
 				}
 				this.phasedFile = args[i];
-				if((i == args.length) || phasedFile.charAt(0) == '-'){
+				if(phasedFile.charAt(0) == '-'){
 					throw new ArgsException("No Input Phased SNP File.");
 				}
 			}else if(arg.equals("-sampleinfo")){
@@ -123,18 +123,9 @@ public class Setting {
 					throw new ArgsException("No Input Sample Info File.");
 				}
 				sampleFile = args[i];
-				if((i == args.length) || sampleFile.charAt(0) == '-'){
+				if(sampleFile.charAt(0) == '-'){
 					throw new ArgsException("No Input Sample Info File.");
 				}
-//			}else if(arg.equals("-geneposition")){
-//				i++;
-//				if(i == l){
-//					throw new ArgsException("No Input Snp File.");					
-//				}
-//				geneFile = args[i];
-//				if((i == args.length) || snpFile.charAt(0) == '-'){
-//					throw new ArgsException("No Gene Position File.");
-//				}
 			}else if(arg.equals("-filesplit")){
 				i++;
 				if(i == l){
@@ -155,7 +146,7 @@ public class Setting {
 				}
 			}else if(arg.equals("-sample-nn")){
 				i++;
-				if((i == args.length) || args[i].charAt(0) == '-'){
+				if(args[i].charAt(0) == '-'){
 					throw new ArgsException("No Limit Ratio of NN.");
 				}
 				this.sampleRatio = Double.parseDouble(args[i]);
@@ -164,7 +155,7 @@ public class Setting {
 				}
 			}else if(arg.equals("-snp-nn")){
 				i++;
-				if((i == args.length) || args[i].charAt(0) == '-'){
+				if(args[i].charAt(0) == '-'){
 					throw new ArgsException("No Limit Ratio of NN.");
 				}
 				NNRatio = Double.parseDouble(args[i]);
